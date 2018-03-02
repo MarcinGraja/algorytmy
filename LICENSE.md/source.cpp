@@ -20,7 +20,7 @@ void add(node*& head, int value)
 	//cout << "In add \n value \t next \t\t prev \t\t adress \n" << Node->value << '\t' << Node->next << '\t' << Node->prev <<'\t'<< Node<<endl;
 
 }
-void add(node*& head, int value, int position)
+void add(node*& head, int value, int position)//should use add(node*&,int)
 {
 	node* temp=head;
 	for (int i = 0; i < position; i++)
