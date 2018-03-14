@@ -92,6 +92,10 @@ void deleteAfter(node*& cNode, float value)
         temp=temp->next;
     } while (temp!=cNode);
 }
+void deleteAfterMax(node *&cNode)
+{
+    deleteAfter(cNode,max(cNode));
+}
 int main()
 {
     node* cycList=NULL;
@@ -101,10 +105,28 @@ int main()
         int x=rand()%i;
         add(cycList,x);
     }
+    cout<<"1. Usun tylko 1 element\n2. Usun wszystkie elementy\n";
+    int n;
+    cin>>n;
+    cout<<endl;
     show(cycList);
-    while (cycList)
+    switch(n)
     {
-        deleteAfter(cycList,max(cycList));
-        show(cycList);
+        case 1:
+            deleteAfterMax(cycList);
+            show(cycList);
+            break;
+
+        case 2:
+            while (cycList)
+            {
+                deleteAfterMax(cycList);
+                show(cycList);
+            }
+            break;
+        default:;
     }
+    cout<<"\nUsuwamy jeszcze raz\n";
+    deleteAfterMax(cycList);
+    if (n==1)show(cycList);
 }
