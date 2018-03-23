@@ -66,18 +66,13 @@ void prettyPrint(int *tab, int n, int pivot, int i, int j)
 
 void quicksort(int *tab,int n)
 {
-    if (verbose)
-    {
-        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-        SetConsoleTextAttribute(hConsole,15);
-        cout<<"\n*******new iteration;n="<<n<<"*******\n";
-        printOnce();
-    }
-    if (n==1)
-    {
-        if (verbose) prettyPrint(tab,n);
-        return;
-    }
+//    if (verbose)
+//    {
+//        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+//        SetConsoleTextAttribute(hConsole,15);
+//        cout<<"\n*******new iteration;n="<<n<<"*******\n";
+//        printOnce();
+//    }
     if (n==2)
     {
         if (tab[0]>tab[1])
@@ -86,89 +81,69 @@ void quicksort(int *tab,int n)
             tab[0]=tab[1];
             tab[1]=temp;
         }
-        if (verbose) prettyPrint(tab,n);
-        return;
-    }
-    if (n<=0)
-    {
-        if (verbose) cout<<"\ndun fked up\n";
+//        if (verbose) prettyPrint(tab,n);
         return;
     }
     int i=0,j=n-1;
-    int pivot=0;
+    int pivot=tab[rand()%n];
     int temp;
-    if (verbose) prettyPrint(tab,n,pivot,i,j);
-    do
+//    if (verbose) prettyPrint(tab,n,pivot,i,j);
+    while (i<=j)
     {
-        while (tab[j]>=tab[pivot])
+        while (tab[j]>=pivot&&j>1) j--;
+        while (tab[i]<=pivot&&i<n-1) i++;
+
+        if (i<=j)
         {
-            if (j>pivot) j--;
-            else break;
+            temp=tab[i];
+            tab[i]=tab[j];
+            tab[j]=temp;
         }
-        temp=tab[j];
-        tab[j]=tab[pivot];
-        tab[pivot]=temp;
-        pivot=j;
-        if (i<pivot) i++;
-        if (verbose) prettyPrint(tab,n,pivot,i,j);
-        if (i==j) break;
-        while (tab[i]<=tab[pivot])
-        {
-            if (i<pivot)i++;
-            else break;
-        }
-        temp=tab[i];
-        tab[i]=tab[pivot];
-        tab[pivot]=temp;
-        pivot=i;
-        if (j>pivot) j++;
-        if (verbose) prettyPrint(tab,n,pivot,i,j);
-    } while (i!=j);
-    if (verbose) prettyPrint(tab,n,pivot,i,j);
-    if(pivot) quicksort(tab,pivot);
-    if (n-pivot-1) quicksort(tab+pivot+1,n-pivot-1);
+//        if (verbose) prettyPrint(tab,n,pivot,i,j);
+    }
+    //if (verbose) prettyPrint(tab,n,pivot,i,j);
+    if (pivot>1) quicksort(tab,pivot);
+    if (n-pivot-1>1) quicksort(tab+pivot+1,n-pivot-1);
 }
 int main()
 {
     srand(time(NULL));
-    int n=1000000;
     int x=15;
     int okCount=0;
-    for (long int i=0; i<n; i++)
-    {
-        int *tab= new int[x];
-        int *tab2=new int[x];//copy of tab; to be used when debugging
+    int *tab= new int[x];
+    int *tab2=new int[x];//copy of tab; to be used when debugging
 
-        for (int i=0; i<x; i++)
-        {
-            tab[i]=rand()%89+10;
-            tab2[i]=tab[i];
-        }
-        quicksort(tab,x);
-        for (int i=0;i<x-1;i++)
-        {
-            if (tab[i]>tab[i+1])
-            {
-                tabGlobal=tab2;
-                sizeGlobal=x;
-                verbose=1;
-                cout<<"Failed; tab:\n";
-                printOnce(tab,x);
-                cout<<"\nunsorted:\n";
-                printOnce(tab2,x);
-                quicksort(tab2,x);
-                verbose=0;
-                cout<<"\n\n enter anything to continue;start with 0 to end\n";
-                string n;
-                cin>>n;
-                if (n[0]=='0') return 0;
-                cin.ignore();
-                break;
-            }
-            if (i==x-2) okCount++;
-        }
-        delete[] tab;
-        delete[] tab2;
+    for (int i=0; i<x; i++)
+    {
+        tab[i]=rand()%89+10;
+        tab2[i]=tab[i];
     }
-    cout<<endl<<okCount<<endl;
+
+    cout<<"arrays created"<<endl;
+    time_t t1Start,t1End,t2Start,t2End;
+
+    t2Start=time(NULL);
+    sort(tab,tab+x);
+    t2End=time(NULL);
+    time_t t2=t2End-t2Start;
+    cout<<"czas funkcji sort:"<<t2<<endl;
+
+    t1Start=time(NULL);
+    quicksort(tab,x);
+    t1End=time(NULL);
+
+    time_t t1=t1End-t1Start;
+    cout<<"czas mojej funkcji:"<<t1<<endl;
+    if (t2) cout<<"t1/t2="<<t1/t2<<endl;
+    for (int i=0;i<x-1;i++)
+    {
+        if (tab[i]>tab[i+1])
+        {
+            break;
+        }
+        if (i==x-2) okCount++;
+    }
+    delete[] tab;
+    delete[] tab2;
+    cout<<endl<<"ok? "<<okCount<<endl;
 }
