@@ -1,80 +1,88 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 using namespace std;
 void quicksort(int *tab,int n)
 {
     if (n==1)
     {
-        cout<<"<quicksort>:last element:"<<tab[0]<<"\n"<<tab<<endl;
+        return;
+    }
+    if (n==2)
+    {
+        if (tab[0]>tab[1])
+        {
+            int temp=tab[0];
+            tab[0]=tab[1];
+            tab[1]=temp;
+        }
         return;
     }
     if (n<=0)
     {
-        cout<<"zjebalem\n";
         return;
     }
     int i=0,j=n-1;
     int pivot=0;
-    int temp=-1;
-    while (i!=j)
+    int temp;
+    do
     {
-        if (j<=pivot&&i>=pivot)
+        while (tab[j]>=tab[pivot])
         {
-            temp=j;
-            j=i;
-            i=temp;
-        }
-        while (tab[j]>=tab[pivot]&&j>=pivot)
-        {
-            if (j>0) j--;
+            if (j>pivot) j--;
+            else break;
         }
         temp=tab[j];
         tab[j]=tab[pivot];
         tab[pivot]=temp;
         pivot=j;
         if (i==j) break;
-        while (tab[i]<=tab[pivot]&&i<=pivot)
+        while (tab[i]<=tab[pivot])
         {
-            if (i<n-1)i++;
+            if (i<pivot)i++;
+            else break;
         }
         temp=tab[i];
         tab[i]=tab[pivot];
         tab[pivot]=temp;
         pivot=i;
-    }
-    cout<<"<quicksort>:tab["<<n<<"]\t"<<tab<<"\n";
-    for (int k=0; k<n; k++)
-    {
-        cout<<tab[k]<<'\t';
-    }
-    cout<<"\n\nend of writing\n\n";
+    } while (i+2!=j);
     if(pivot)quicksort(tab,pivot);
-    if(n-pivot)quicksort(tab+pivot+1,n-pivot);
+    if(n-pivot)quicksort(tab+pivot+1,n-pivot-1);
 }
 int main()
 {
-    int n=1;
-    while(n)
+    srand(time(NULL));
+    int n=100;
+    for (long int i=2; i<n; i++)
     {
-        cout<<"give n:"<<endl;
-        cin>>n;
-        if (!n) break;
-        int *tab= new int[n];
-        srand(time(NULL));
-        for (int i=0; i<n; i++)
+        int *tab= new int[i];
+        int *tab2=new int[i];
+
+        for (int k=0; k<i; k++)
         {
-            tab[i]=rand()%89+10;
-            cout<<tab[i]<<'\t';
+            tab[k]=rand()%89+10;
+            tab2[k]=tab[k];
         }
-        cout<<"\n\nend of writing\n\n";
-        quicksort(tab,n);
-        cout<<"sorted:\n";
-        for (int i=0; i<n; i++)
+        quicksort(tab,i);
+        sort(tab2,tab2+i);
+        for (int j=0;j<i;j++)
         {
-            cout<<tab[i]<<'\t';
+            if (tab[j]!=tab2[j])
+            {
+                for (int j=0; j<i; j++)
+                {
+                    cout<<tab[j]<<'\t';
+                }
+                cout<<"\n\n";
+                break;
+            }
+            if (j==n-1) cout<<i<<" ok\n";
         }
-        cout<<endl;
-        delete tab;
+        delete[] tab;
+        delete[] tab2;
+        //for (int j=0; j<100; j+=10)
+        //if (n/i==j&&n%i==0) cout <<j<<"%\n";
     }
 }
