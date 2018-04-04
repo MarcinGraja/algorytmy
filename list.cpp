@@ -1,9 +1,10 @@
 #include <iostream>
 #include <fstream>
+#include <cmath>
 using namespace std;
 struct node
 {
-	int value;
+	float value;
 	node* next = NULL;
 	node* prev = NULL;
 };
@@ -16,7 +17,7 @@ void show(node* head)
 	}
 	cout << endl;
 }
-void add(node*& head, int value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
+void add(node*& head, float value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
 {
 	node* temp = head;
 	if (position <= 0 || head == 0)
@@ -61,7 +62,7 @@ void add(node*& head, int value, int position)//adds element at position. If pos
 	}
 
 }
-void add(node*& head, int value)
+void add(node*& head, float value)
 {
 	add(head, value, 0);
 }
@@ -120,7 +121,7 @@ void swap(node*&head, int pos1, int pos2)
 }
 void readFromFile(node*& head, char* filename)
 {
-	int a;
+	float a;
 	ifstream F;
 	F.open(filename);
 	if (F.good())
@@ -153,6 +154,35 @@ void remove(node*& head, int a)
 		temp = temp->next;
 	}
 }
+int set(node *&head, int pos, float value)
+{
+	node *temp=head;
+	for (int i=0; i<pos; i++)
+	{
+		if (temp) temp=temp->next;
+		else
+		{
+			cout<<"function set: Invalid index"<<endl;
+			return -1;
+		}
+	}
+	node->value=value;
+	return 0;
+}
+float get(node *&head, int pos,)
+{
+	node *temp=head;
+	for (int i=0; i<pos; i++)
+	{
+		if (temp) temp=temp->next;
+		else 
+		{
+			cout<<"function set: Invalid index"<<endl;
+			return nan("");
+		}
+	}
+	return temp->value;
+}
 int main()
 {
 	node *head = NULL;
@@ -161,7 +191,7 @@ int main()
 	while (1)
 	{
 		cout << "1:add at given pos; 2:delete of given value; 3:read from file; 4:swap" << endl;
-		int n = 1;
+		int n;
 		cin>>n;
 		cout << endl;
 		switch (n)
