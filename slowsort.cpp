@@ -121,7 +121,7 @@ void quicksort(int *tab,int n)
         tab[i]=tab[pivot];
         tab[pivot]=temp;
         pivot=i;
-        if (j>pivot) j++;
+        if (j>pivot) j--;
         if (verbose) prettyPrint(tab,n,pivot,i,j);
     } while (i!=j);
     if (verbose) prettyPrint(tab,n,pivot,i,j);
