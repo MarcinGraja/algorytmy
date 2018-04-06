@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <ctime>
 using namespace std;
 struct node
 {
@@ -10,6 +11,7 @@ struct node
 };
 void show(node* head)
 {
+
 	while (head != NULL)
 	{
 		cout << head->value << '\t';
@@ -66,6 +68,40 @@ void add(node*& head, float value)
 {
 	add(head, value, 0);
 }
+void swap(node *&head, node *&t1, node *&t2)
+{
+	node *t1Prev = t1->prev, *t1Next = t1->next;
+	if (t1->next == t2 || t2->next == t1)
+	{
+		if (t1->next == t2)
+		{
+			t2->prev = t1->prev;
+			t1->next = t2->next;
+			t2->next = t1;
+			t1->prev = t2;
+		}
+		else
+		{
+			t2->next = t1->next;
+			t1->prev = t2->prev;
+			t1->next = t2;
+			t2->prev = t1;
+		}
+	}
+	else
+	{
+		t1->next = t2->next;
+		t1->prev = t2->prev;
+		t2->next = t1Next;
+		t2->prev = t1Prev;
+	}
+	if (t1->prev == 0) head = t1;
+	if (t2->prev == 0) head = t2;
+	if (t1->prev) t1->prev->next = t1;
+	if (t1->next) t1->next->prev = t1;
+	if (t2->prev) t2->prev->next = t2;
+	if (t2->next) t2->next->prev = t2;
+}
 void swap(node*&head, int pos1, int pos2)
 {
 	node *t1 = NULL, *t2 = NULL, *t3 = head;
@@ -81,7 +117,6 @@ void swap(node*&head, int pos1, int pos2)
 		if (t3->next) t3 = t3->next;
 		else break;
 	}
-	cout << endl;
 	if (!(t1&&t2))
 	{
 		cout << "out of range\nt1:" << t1 << "t2:" << t2 << endl;
@@ -159,7 +194,7 @@ int set(node *&head, int pos, float value)
 	node *temp = head;
 	for (int i = 0; i<pos; i++)
 	{
-		if (temp) temp = temp->next;
+		if (temp->next) temp = temp->next;
 		else
 		{
 			cout << "function set: Invalid index" << endl;
@@ -197,6 +232,30 @@ void split(node *&head, node *&head2, int pos)
 	head2 = temp;
 	return;
 }
+void bubblesort(node *&head)
+{
+	int size = 0;
+	int count;
+	do
+	{
+		count = 0;
+		node *temp = head;
+		int last = 0;
+		int i = 0;
+		while (temp->next)
+		{
+			if (temp->value > temp->next->value)
+			{
+				count++;
+				swap(head, i,i+1);
+				last = i;
+			}
+			if (temp->next) temp = temp->next;
+			i++;
+		}
+		size = last;
+	} while (count);
+}
 int main()
 {
 	node *head = NULL, *head2=NULL;
@@ -204,12 +263,20 @@ int main()
 	int i = 100;
 	while (1)
 	{
-		cout << "1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set" << endl;
+		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort" << endl;
 		int n;
 		cin >> n;
 		cout << endl;
 		switch (n)
 		{
+		case 0:
+			cin >> n;
+			srand(time(NULL));
+			for (int i = 0; i < n; i++)
+			{
+				add(head, rand() % 900 + 100);
+			}
+			break;
 		case 1:
 			cin >> n;
 			cout << endl;
@@ -238,15 +305,18 @@ int main()
 		case 6:
 			int pos;
 			cin >> pos;
-			get(head, pos);
+			cout<<get(head, pos)<<endl;
+			break;
 		case 7:
-			int pos;
 			float value;
 			cin >> pos>>value;
 			set(head, pos, value);
+			break;
+		case 8:
+			bubblesort(head);
+			break;
 		}
 		show(head);
-		show(head2);
 	}
 	cout << endl;
 }
