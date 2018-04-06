@@ -74,17 +74,17 @@ void swap(node*&head, int pos1, int pos2)
 		cout << "list is empty\n";
 		return;
 	}
-	for(int i=0;i<=pos1||i<=pos2;i++)
+	for (int i = 0; i <= pos1 || i <= pos2; i++)
 	{
-		if (i==pos1) t1 = t3;
-		if (i==pos2) t2 = t3;
+		if (i == pos1) t1 = t3;
+		if (i == pos2) t2 = t3;
 		if (t3->next) t3 = t3->next;
 		else break;
 	}
 	cout << endl;
 	if (!(t1&&t2))
 	{
-		cout << "out of range\nt1:"<<t1<<"t2:"<<t2<<endl; 
+		cout << "out of range\nt1:" << t1 << "t2:" << t2 << endl;
 		return;
 	}
 	node *t1Prev = t1->prev, *t1Next = t1->next;
@@ -105,7 +105,7 @@ void swap(node*&head, int pos1, int pos2)
 			t2->prev = t1;
 		}
 	}
-	else 
+	else
 	{
 		t1->next = t2->next;
 		t1->prev = t2->prev;
@@ -137,7 +137,7 @@ void readFromFile(node*& head, char* filename)
 void remove(node*& head, int a)
 {
 	node *temp = head;
-	while (temp!= NULL)
+	while (temp != NULL)
 	{
 		//cout << "in remove \n value \t next \t\t prev \t\t adress \n" << temp->value << '\t' << temp->next << '\t' << temp->prev << '\t' << temp << endl;
 		if (temp->value == a)
@@ -156,43 +156,57 @@ void remove(node*& head, int a)
 }
 int set(node *&head, int pos, float value)
 {
-	node *temp=head;
-	for (int i=0; i<pos; i++)
+	node *temp = head;
+	for (int i = 0; i<pos; i++)
 	{
-		if (temp) temp=temp->next;
+		if (temp) temp = temp->next;
 		else
 		{
-			cout<<"function set: Invalid index"<<endl;
+			cout << "function set: Invalid index" << endl;
 			return -1;
 		}
 	}
-	node->value=value;
+	temp->value = value;
 	return 0;
 }
-float get(node *&head, int pos,)
+float get(node *&head, int pos)
 {
-	node *temp=head;
-	for (int i=0; i<pos; i++)
+	node *temp = head;
+	for (int i = 0; i<pos; i++)
 	{
-		if (temp) temp=temp->next;
-		else 
+		if (temp) temp = temp->next;
+		else
 		{
-			cout<<"function set: Invalid index"<<endl;
+			cout << "function set: Invalid index" << endl;
 			return nan("");
 		}
 	}
 	return temp->value;
 }
+void split(node *&head, node *&head2, int pos)
+{
+	if (pos < 1) return;
+	node *temp = head;
+	for (int i = 0; i < pos; i++)
+	{
+		if (temp) temp = temp->next;
+		else return;
+	}
+	temp->prev->next = NULL;
+	temp->prev = NULL;
+	head2 = temp;
+	return;
+}
 int main()
 {
-	node *head = NULL;
+	node *head = NULL, *head2=NULL;
 	show(head);
 	int i = 100;
 	while (1)
 	{
-		cout << "1:add at given pos; 2:delete of given value; 3:read from file; 4:swap" << endl;
+		cout << "1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set" << endl;
 		int n;
-		cin>>n;
+		cin >> n;
 		cout << endl;
 		switch (n)
 		{
@@ -200,29 +214,39 @@ int main()
 			cin >> n;
 			cout << endl;
 			add(head, i, n);
-			show(head);
 			i++;
 			break;
 		case 2:
 			cin >> n;
 			cout << endl;
 			remove(head, n);
-			show(head);
-			cout << head << endl;
 			break;
+
 		case 3:
 			readFromFile(head, "liczby.txt");
-			show(head);
-
 			break;
+
 		case 4:
 			int pos1, pos2;
 			cin >> pos1 >> pos2;
 			cout << endl;
 			swap(head, pos1, pos2);
-			show(head);
 			break;
+		case 5:
+			cin >> n;
+			split(head, head, n);
+		case 6:
+			int pos;
+			cin >> pos;
+			get(head, pos);
+		case 7:
+			int pos;
+			float value;
+			cin >> pos>>value;
+			set(head, pos, value);
 		}
+		show(head);
+		show(head2);
 	}
 	cout << endl;
 }
