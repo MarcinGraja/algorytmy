@@ -234,26 +234,22 @@ void split(node *&head, node *&head2, int pos)
 }
 void bubblesort(node *&head)
 {
-	int size = 0;
-	int count;
+	node last =NULL;
 	do
 	{
-		count = 0;
 		node *temp = head;
-		int last = 0;
-		int i = 0;
-		while (temp->next)
+		node *lastCandidate;
+		while (temp->next!=last)
 		{
 			if (temp->value > temp->next->value)
 			{
-				count++;
 				swap(head, i,i+1);
-				last = i;
+				lastCandidate = temp->next;
 			}
 			if (temp->next) temp = temp->next;
 			i++;
 		}
-		size = last;
+		last=lastCandidate;
 	} while (count);
 }
 int main()
