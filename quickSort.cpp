@@ -1,149 +1,365 @@
 #include <iostream>
-#include <cstdlib>
+#include <fstream>
+#include <cmath>
 #include <ctime>
-#include <algorithm>
-#include <string>
-#include <windows.h>
+#include <cstdlib>
 using namespace std;
-bool verbose = 0;
-int *tabGlobal=NULL;
-int sizeGlobal=0;
-void printOnce()
+struct node
 {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, 264);
-    for (int t=0; t<sizeGlobal; t++)
-    {
-        cout<<tabGlobal[t]<<'\t';
-    }
-    cout<<endl;
-}
-void printOnce(int *tab, int x)
+	float value;
+	node* next = NULL;
+	node* prev = NULL;
+};
+void show(node* head)
 {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, 264);
-    for (int t=0; t<x; t++)
-    {
-        cout<<tab[t]<<'\t';
-    }
-    cout<<endl;
-}
-void prettyPrint(int *tab, int n)
-{
-    int *temp=tabGlobal;
-    while (temp<tab)
-    {
-        cout<<'\t';
-        temp++;
-    }
-    for (int t=0; t<n; t++)
-    {
-        cout<<tab[t]<<'\t';
-    }
-    cout<<endl;
-}
 
-void prettyPrint(int *tab, int n, int pivot, int i, int j)
-{
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    int *temp=tabGlobal;
-    while (temp<tab)
-    {
-        cout<<'\t';
-        temp++;
-    }
-    for (int t=0; t<n; t++)
-    {
-        if (t<i) SetConsoleTextAttribute(hConsole, 10);//colour green; should be less than tab[pivot]
-        else if(t>j) SetConsoleTextAttribute(hConsole, 9);//colour blue; should be more than tab[pivot]
-        else if (t==pivot)SetConsoleTextAttribute(hConsole, 12);//colour red; tab[pivot]
-        else SetConsoleTextAttribute(hConsole,15);//colour white; no info yet
-        cout<<tab[t]<<'\t';
-    }
-    SetConsoleTextAttribute(hConsole,15);
-    cout<<endl;
+	while (head != NULL)
+	{
+		cout << head->value << '\t';
+		head = head->next;
+	}
+	cout << endl;
 }
-
-void quicksort(int *tab,int n)
+void add(node *head,node *newNode)
 {
-//    if (verbose)
-//    {
-//        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-//        SetConsoleTextAttribute(hConsole,15);
-//        cout<<"\n*******new iteration;n="<<n<<"*******\n";
-//        printOnce();
-//    }
-    if (n==2)
+    if (headNULL)
     {
-        if (tab[0]>tab[1])
-        {
-            int temp=tab[0];
-            tab[0]=tab[1];
-            tab[1]=temp;
-        }
-//        if (verbose) prettyPrint(tab,n);
+        head=newNode;
         return;
     }
-    int i=0,j=n-1;
-    int pivot=tab[rand()%n];
-    int temp;
-//    if (verbose) prettyPrint(tab,n,pivot,i,j);
-    while (i<=j)
+    else if(newNode)
     {
-        while (tab[j]>=pivot&&j>1) j--;
-        while (tab[i]<=pivot&&i<n-1) i++;
-
-        if (i<=j)
-        {
-            temp=tab[i];
-            tab[i]=tab[j];
-            tab[j]=temp;
-        }
-//        if (verbose) prettyPrint(tab,n,pivot,i,j);
+        newNode->next=head->next;
+        newNode->next->prev=newNode;
+        newNode->prev=head;
+        head->next=newNode;
     }
-    //if (verbose) prettyPrint(tab,n,pivot,i,j);
-    if (pivot>1) quicksort(tab,pivot);
-    if (n-pivot-1>1) quicksort(tab+pivot+1,n-pivot-1);
+}
+void add(node*& head, float value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
+{
+	node* temp = head;
+	if (position <= 0 || head == 0)
+	{
+		temp = new node;
+		temp->value = value;
+		temp->next = head;
+		if (head) head->prev = temp;
+		head = temp;
+		return;
+	}
+	int i = 1;
+	node* Node = new node;
+	Node->value = value;
+	while (1)
+	{
+		if (temp->next != NULL&&i<position) temp = temp->next;
+		else if (temp->next == NULL)
+		{
+			if (temp->next == 0)//adding at the last place in the list
+			{
+				Node->next = 0;
+				Node->prev = temp;
+				temp->next = Node;
+				return;
+			}
+			Node->next = temp;
+			Node->prev = temp->prev;
+			temp->prev = Node;
+			if (Node->prev) Node->prev->next = Node;
+			return;
+		}
+		else
+		{
+			Node->next = temp->next;
+			Node->prev = temp;
+			temp->next = Node;
+			Node->next->prev = Node;
+			return;
+		}
+		i++;
+	}
+
+}
+void add(node*& head, float value)
+{
+	add(head, value, 0);
+}
+void swap(node *&head, node *t1, node *t2)
+{
+	node *t1Prev = t1->prev, *t1Next = t1->next;
+	if (t1->next == t2 || t2->next == t1)
+	{
+		if (t1->next == t2)
+		{
+			t2->prev = t1->prev;
+			t1->next = t2->next;
+			t2->next = t1;
+			t1->prev = t2;
+		}
+		else
+		{
+			t2->next = t1->next;
+			t1->prev = t2->prev;
+			t1->next = t2;
+			t2->prev = t1;
+		}
+	}
+	else
+	{
+		t1->next = t2->next;
+		t1->prev = t2->prev;
+		t2->next = t1Next;
+		t2->prev = t1Prev;
+	}
+	if (t1->prev == 0) head = t1;
+	if (t2->prev == 0) head = t2;
+	if (t1->prev) t1->prev->next = t1;
+	if (t1->next) t1->next->prev = t1;
+	if (t2->prev) t2->prev->next = t2;
+	if (t2->next) t2->next->prev = t2;
+}
+void swap(node*&head, int pos1, int pos2)
+{
+	node *t1 = NULL, *t2 = NULL, *t3 = head;
+	if (!t3)
+	{
+		cout << "list is empty\n";
+		return;
+	}
+	for (int i = 0; i <= pos1 || i <= pos2; i++)
+	{
+		if (i == pos1) t1 = t3;
+		if (i == pos2) t2 = t3;
+		if (t3->next) t3 = t3->next;
+		else break;
+	}
+	if (!(t1&&t2))
+	{
+		cout << "out of range\nt1:" << t1 << "t2:" << t2 << endl;
+		return;
+	}
+	node *t1Prev = t1->prev, *t1Next = t1->next;
+	if (t1->next == t2 || t2->next == t1)
+	{
+		if (t1->next == t2)
+		{
+			t2->prev = t1->prev;
+			t1->next = t2->next;
+			t2->next = t1;
+			t1->prev = t2;
+		}
+		else
+		{
+			t2->next = t1->next;
+			t1->prev = t2->prev;
+			t1->next = t2;
+			t2->prev = t1;
+		}
+	}
+	else
+	{
+		t1->next = t2->next;
+		t1->prev = t2->prev;
+		t2->next = t1Next;
+		t2->prev = t1Prev;
+	}
+	if (t1->prev == 0) head = t1;
+	if (t2->prev == 0) head = t2;
+	if (t1->prev) t1->prev->next = t1;
+	if (t1->next) t1->next->prev = t1;
+	if (t2->prev) t2->prev->next = t2;
+	if (t2->next) t2->next->prev = t2;
+}
+void readFromFile(node*& head, char* filename)
+{
+	float a;
+	ifstream F;
+	F.open(filename);
+	if (F.good())
+	{
+		while (!F.eof())
+		{
+			a = 0;
+			F >> a;
+			add(head, a, 100);
+		}
+	}
+}
+void remove(node*& head, int a)
+{
+	node *temp = head;
+	while (temp != NULL)
+	{
+		//cout << "in remove \n value \t next \t\t prev \t\t adress \n" << temp->value << '\t' << temp->next << '\t' << temp->prev << '\t' << temp << endl;
+		if (temp->value == a)
+		{
+			if (temp->prev != NULL)
+			{
+				temp->prev->next = temp->next;
+			}
+			else head = temp->next;
+			if (temp->next) temp->next->prev = temp->prev;
+			delete temp;
+			break;
+		}
+		temp = temp->next;
+	}
+}
+int set(node *&head, int pos, float value)
+{
+	node *temp = head;
+	for (int i = 0; i<pos; i++)
+	{
+		if (temp->next) temp = temp->next;
+		else
+		{
+			cout << "function set: Invalid index" << endl;
+			return -1;
+		}
+	}
+	temp->value = value;
+	return 0;
+}
+float get(node *&head, int pos)
+{
+	node *temp = head;
+	for (int i = 0; i<pos; i++)
+	{
+		if (temp) temp = temp->next;
+		else
+		{
+			cout << "function set: Invalid index" << endl;
+			return nan("");
+		}
+	}
+	return temp->value;
+}
+node *split(node *&head, int pos)
+{
+	if (pos < 1) return NULL;
+	node *temp = head;
+	for (int i = 0; i < pos; i++)
+	{
+		if (temp) temp = temp->next;
+		else return NULL;
+	}
+	node *head2 = temp->next;
+	temp->prev->next = NULL;
+	temp->prev = NULL;
+	return head2;
+}
+void bubblesort(node *&head)
+{
+	node *last =NULL;
+	do
+	{
+		node *temp = head;
+		node *lastCandidate=head;
+		while (temp->next!=last)
+		{
+			if (temp->value > temp->next->value)
+			{
+				swap(head, temp, temp->next);
+				lastCandidate = temp;
+			}
+			else if (temp->next) temp = temp->next;
+		}
+		last=lastCandidate;
+	} while (last!=head);
+}
+void quicksort(node *&head)
+{
+    if (head->next==NULL) return;
+    if (head->next->next==NULL)
+    {
+        if (head->value>head->next->value) swap(head,head,head->next);
+        return;
+    }
+    node *low=NULL, *mid=NULL, *top=NULL;
+    float pivot=get(head);
+    node *temp=head;
+    while(temp)
+    {
+        node *next=temp->next;
+        if (get(temp)<pivot) add(low,temp);
+        if (get(temp)==pivot) add(mid,temp);
+        if (get(temp)>pivot) add(top, temp);
+        temp=next;
+    }
+    quicksort(low);
+    quicksort(mid);
+    quicksort(top);
+    merge(low, mid);//todo merge
+    merge(mid, top);
 }
 int main()
 {
-    srand(time(NULL));
-    int x=15;
-    int okCount=0;
-    int *tab= new int[x];
-    int *tab2=new int[x];//copy of tab; to be used when debugging
+	node *head = NULL, *head2=NULL;
+	show(head);
+	int i = 100;
+	while (1)
+	{
+		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort" << endl;
+		int n;
+		cin >> n;
+		cout << endl;
+		switch (n)
+		{
+		case 0:     //fill random
+		    cout<<"How many numbers:";
+			cin >> n;
+			srand(time(NULL));
+			for (int i = 0; i < n; i++)
+			{
+				add(head, rand() % 900 + 100);
+			}
+			break;
+		case 1:     //add at pos
+		    cout<<"Position:";
+			cin >> n;
+			cout << endl;
+			add(head, i, n);
+			i++;
+			break;
+		case 2:     //delete value
+		    cout<<"Value:";
+			cin >> n;
+			cout << endl;
+			remove(head, n);
+			break;
 
-    for (int i=0; i<x; i++)
-    {
-        tab[i]=rand()%89+10;
-        tab2[i]=tab[i];
-    }
+		case 3:     //read from file
+			readFromFile(head, "liczby.txt");
+			break;
 
-    cout<<"arrays created"<<endl;
-    time_t t1Start,t1End,t2Start,t2End;
-
-    t2Start=time(NULL);
-    sort(tab,tab+x);
-    t2End=time(NULL);
-    time_t t2=t2End-t2Start;
-    cout<<"czas funkcji sort:"<<t2<<endl;
-
-    t1Start=time(NULL);
-    quicksort(tab,x);
-    t1End=time(NULL);
-
-    time_t t1=t1End-t1Start;
-    cout<<"czas mojej funkcji:"<<t1<<endl;
-    if (t2) cout<<"t1/t2="<<t1/t2<<endl;
-    for (int i=0;i<x-1;i++)
-    {
-        if (tab[i]>tab[i+1])
-        {
-            break;
-        }
-        if (i==x-2) okCount++;
-    }
-    delete[] tab;
-    delete[] tab2;
-    cout<<endl<<"ok? "<<okCount<<endl;
+		case 4:     //swap
+		    cout<<"Positions:\n";
+			int pos1, pos2;
+			cin >> pos1 >> pos2;
+			cout << endl;
+			swap(head, pos1, pos2);
+			break;
+		case 5:     //split
+		    cout<<"Index of last element in first list:";
+			cin >> n;
+			head2=split(head, n);
+			break;
+		case 6:     //get
+			int pos;
+			cin >> pos;
+			cout<<get(head, pos)<<endl;
+			break;
+		case 7:     //set
+			float value;
+			cin >> pos>>value;
+			set(head, pos, value);
+			break;
+		case 8:     //bubblesort
+			bubblesort(head);
+			break;
+		}
+		show(head);
+		show(head2);
+	}
+	cout << endl;
 }
