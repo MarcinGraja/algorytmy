@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
 using namespace std;
 struct node
 {
@@ -18,6 +19,21 @@ void show(node* head)
 		head = head->next;
 	}
 	cout << endl;
+}
+void add(node *head,node *newNode)
+{
+    if (headNULL)
+    {
+        head=newNode;
+        return;
+    }
+    else if(newNode)
+    {
+        newNode->next=head->next;
+        newNode->next->prev=newNode;
+        newNode->prev=head;
+        head->next=newNode;
+    }
 }
 void add(node*& head, float value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
 {
@@ -68,7 +84,7 @@ void add(node*& head, float value)
 {
 	add(head, value, 0);
 }
-void swap(node *&head, node *&t1, node *&t2)
+void swap(node *&head, node *t1, node *t2)
 {
 	node *t1Prev = t1->prev, *t1Next = t1->next;
 	if (t1->next == t2 || t2->next == t1)
@@ -218,39 +234,63 @@ float get(node *&head, int pos)
 	}
 	return temp->value;
 }
-void split(node *&head, node *&head2, int pos)
+node *split(node *&head, int pos)
 {
-	if (pos < 1) return;
+	if (pos < 1) return NULL;
 	node *temp = head;
 	for (int i = 0; i < pos; i++)
 	{
 		if (temp) temp = temp->next;
-		else return;
+		else return NULL;
 	}
+	node *head2 = temp->next;
 	temp->prev->next = NULL;
 	temp->prev = NULL;
-	head2 = temp;
-	return;
+	return head2;
 }
 void bubblesort(node *&head)
 {
-	node last =NULL;
+	node *last =NULL;
 	do
 	{
 		node *temp = head;
-		node *lastCandidate;
+		node *lastCandidate=head;
 		while (temp->next!=last)
 		{
 			if (temp->value > temp->next->value)
 			{
-				swap(head, i,i+1);
-				lastCandidate = temp->next;
+				swap(head, temp, temp->next);
+				lastCandidate = temp;
 			}
-			if (temp->next) temp = temp->next;
-			i++;
+			else if (temp->next) temp = temp->next;
 		}
 		last=lastCandidate;
-	} while (count);
+	} while (last!=head);
+}
+void quicksort(node *&head)
+{
+    if (head->next==NULL) return;
+    if (head->next->next==NULL)
+    {
+        if (head->value>head->next->value) swap(head,head,head->next);
+        return;
+    }
+    node *low=NULL, *mid=NULL, *top=NULL;
+    float pivot=get(head);
+    node *temp=head;
+    while(temp)
+    {
+        node *next=temp->next;
+        if (get(temp)<pivot) add(low,temp);
+        if (get(temp)==pivot) add(mid,temp);
+        if (get(temp)>pivot) add(top, temp);
+        temp=next;
+    }
+    quicksort(low);
+    quicksort(mid);
+    quicksort(top);
+    merge(low, mid);//todo merge
+    merge(mid, top);
 }
 int main()
 {
@@ -265,7 +305,8 @@ int main()
 		cout << endl;
 		switch (n)
 		{
-		case 0:
+		case 0:     //fill random
+		    cout<<"How many numbers:";
 			cin >> n;
 			srand(time(NULL));
 			for (int i = 0; i < n; i++)
@@ -273,46 +314,52 @@ int main()
 				add(head, rand() % 900 + 100);
 			}
 			break;
-		case 1:
+		case 1:     //add at pos
+		    cout<<"Position:";
 			cin >> n;
 			cout << endl;
 			add(head, i, n);
 			i++;
 			break;
-		case 2:
+		case 2:     //delete value
+		    cout<<"Value:";
 			cin >> n;
 			cout << endl;
 			remove(head, n);
 			break;
 
-		case 3:
+		case 3:     //read from file
 			readFromFile(head, "liczby.txt");
 			break;
 
-		case 4:
+		case 4:     //swap
+		    cout<<"Positions:\n";
 			int pos1, pos2;
 			cin >> pos1 >> pos2;
 			cout << endl;
 			swap(head, pos1, pos2);
 			break;
-		case 5:
+		case 5:     //split
+		    cout<<"Index of last element in first list:";
 			cin >> n;
-			split(head, head, n);
-		case 6:
+			head2=split(head, n);
+			break;
+		case 6:     //get
 			int pos;
 			cin >> pos;
 			cout<<get(head, pos)<<endl;
 			break;
-		case 7:
+		case 7:     //set
 			float value;
 			cin >> pos>>value;
 			set(head, pos, value);
 			break;
-		case 8:
+		case 8:     //bubblesort
 			bubblesort(head);
 			break;
 		}
 		show(head);
+		show(head2);
 	}
 	cout << endl;
 }
