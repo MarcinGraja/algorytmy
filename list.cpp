@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
 using namespace std;
 struct node
 {
@@ -68,7 +69,7 @@ void add(node*& head, float value)
 {
 	add(head, value, 0);
 }
-void swap(node *&head, node *&t1, node *&t2)
+void swap(node *&head, node *t1, node *t2)
 {
 	node *t1Prev = t1->prev, *t1Next = t1->next;
 	if (t1->next == t2 || t2->next == t1)
@@ -234,27 +235,26 @@ void split(node *&head, node *&head2, int pos)
 }
 void bubblesort(node *&head)
 {
-	node last =NULL;
+	node *last =NULL;
 	do
 	{
 		node *temp = head;
-		node *lastCandidate;
+		node *lastCandidate=head;
 		while (temp->next!=last)
 		{
 			if (temp->value > temp->next->value)
 			{
-				swap(head, i,i+1);
-				lastCandidate = temp->next;
+				swap(head, temp, temp->next);
+				lastCandidate = temp;
 			}
-			if (temp->next) temp = temp->next;
-			i++;
+			else if (temp->next) temp = temp->next;
 		}
 		last=lastCandidate;
-	} while (count);
+	} while (last!=head);
 }
 int main()
 {
-	node *head = NULL, *head2=NULL;
+	node *head = NULL;
 	show(head);
 	int i = 100;
 	while (1)
