@@ -20,20 +20,21 @@ void show(node* head)
 	}
 	cout << endl;
 }
-void add(node *head,node *newNode)
+void add(node *&head, node *newNode)
 {
-    if (headNULL)
-    {
-        head=newNode;
-        return;
-    }
-    else if(newNode)
-    {
-        newNode->next=head->next;
-        newNode->next->prev=newNode;
-        newNode->prev=head;
-        head->next=newNode;
-    }
+	if (head==NULL)
+	{
+		newNode->next = newNode->prev=NULL;
+		head = newNode;
+		return;
+	}
+	else if (newNode)
+	{
+		newNode->next = head->next;
+		if(newNode->next) newNode->next->prev = newNode;
+		newNode->prev = head;
+		head->next = newNode;
+	}
 }
 void add(node*& head, float value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
 {
@@ -234,6 +235,10 @@ float get(node *&head, int pos)
 	}
 	return temp->value;
 }
+float get(node *Node)
+{
+	return Node->value;
+}
 node *split(node *&head, int pos)
 {
 	if (pos < 1) return NULL;
@@ -250,12 +255,12 @@ node *split(node *&head, int pos)
 }
 void bubblesort(node *&head)
 {
-	node *last =NULL;
+	node *last = NULL;
 	do
 	{
 		node *temp = head;
-		node *lastCandidate=head;
-		while (temp->next!=last)
+		node *lastCandidate = head;
+		while (temp->next != last)
 		{
 			if (temp->value > temp->next->value)
 			{
@@ -264,49 +269,82 @@ void bubblesort(node *&head)
 			}
 			else if (temp->next) temp = temp->next;
 		}
-		last=lastCandidate;
-	} while (last!=head);
+		last = lastCandidate;
+	} while (last != head);
 }
-void quicksort(node *&head)
+void merge(node *head1, node *head2)
 {
-    if (head->next==NULL) return;
-    if (head->next->next==NULL)
-    {
-        if (head->value>head->next->value) swap(head,head,head->next);
-        return;
-    }
-    node *low=NULL, *mid=NULL, *top=NULL;
-    float pivot=get(head);
-    node *temp=head;
-    while(temp)
-    {
-        node *next=temp->next;
-        if (get(temp)<pivot) add(low,temp);
-        if (get(temp)==pivot) add(mid,temp);
-        if (get(temp)>pivot) add(top, temp);
-        temp=next;
-    }
-    quicksort(low);
-    quicksort(mid);
-    quicksort(top);
-    merge(low, mid);//todo merge
-    merge(mid, top);
+	if (head1) while (head1->next)
+	{
+		head1 = head1->next;
+	}
+	head1->next = head2;
+	head2->next = head1;
 }
-int main()
+node *quicksort(node *head,node *&finalHead)
 {
-	node *head = NULL, *head2=NULL;
+	if (head->next == NULL)
+	{
+		if (!finalHead) finalHead = head;
+		return head;
+	}
+	if (head->next->next == NULL)
+	{
+
+		if (head->value>head->next->value) swap(head, head, head->next);
+		if (!finalHead) finalHead = head;
+		return head->next;
+	}
+	node *low = NULL, *mid = NULL, *top = NULL;
+	float pivot = get(head);
+	node *temp = head;
+	node *last = NULL;
+	while (temp)
+	{
+		node *next = temp->next;
+		if (get(temp)<pivot) add(low, temp);
+		if (get(temp) == pivot)
+		{
+			add(mid, temp);
+			if (!top && !mid->next||mid->next&&!mid->next->next) last = temp;
+		}
+		if (get(temp) > pivot)
+		{
+			add(top, temp);
+			if (!top || (top&&!top->next) ) last = temp;
+		}
+		temp = next;
+	}
+	node *lastLow=NULL;
+	if (low) lastLow=quicksort(low,finalHead);
+	if (top) quicksort(top,finalHead);
+	merge(lastLow, mid);
+	merge(mid, top);
+	return last;
+}
+void *quicksort(node *&head)
+{
+	node *finalHead=NULL;
+	quicksort(head, finalHead);	//works, because quicksort (node *head, node *&finalHead) sets
+	head = finalHead;			//finalHead to head when head has one or two elements for the first
+	return NULL;						//time(finalHead==NULL), which are guaranteed to be the very lowest
+								//elements
+}
+int main()						
+{
+	node *head = NULL, *head2 = NULL;
 	show(head);
 	int i = 100;
 	while (1)
 	{
-		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort" << endl;
+		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort" << endl;
 		int n;
 		cin >> n;
 		cout << endl;
 		switch (n)
 		{
 		case 0:     //fill random
-		    cout<<"How many numbers:";
+			cout << "How many numbers:";
 			cin >> n;
 			srand(time(NULL));
 			for (int i = 0; i < n; i++)
@@ -315,14 +353,14 @@ int main()
 			}
 			break;
 		case 1:     //add at pos
-		    cout<<"Position:";
+			cout << "Position:";
 			cin >> n;
 			cout << endl;
 			add(head, i, n);
 			i++;
 			break;
 		case 2:     //delete value
-		    cout<<"Value:";
+			cout << "Value:";
 			cin >> n;
 			cout << endl;
 			remove(head, n);
@@ -333,29 +371,32 @@ int main()
 			break;
 
 		case 4:     //swap
-		    cout<<"Positions:\n";
+			cout << "Positions:\n";
 			int pos1, pos2;
 			cin >> pos1 >> pos2;
 			cout << endl;
 			swap(head, pos1, pos2);
 			break;
 		case 5:     //split
-		    cout<<"Index of last element in first list:";
+			cout << "Index of last element in first list:";
 			cin >> n;
-			head2=split(head, n);
+			head2 = split(head, n);
 			break;
 		case 6:     //get
 			int pos;
 			cin >> pos;
-			cout<<get(head, pos)<<endl;
+			cout << get(head, pos) << endl;
 			break;
 		case 7:     //set
 			float value;
-			cin >> pos>>value;
+			cin >> pos >> value;
 			set(head, pos, value);
 			break;
 		case 8:     //bubblesort
 			bubblesort(head);
+			break;
+		case 9:
+			quicksort(head);
 			break;
 		}
 		show(head);
