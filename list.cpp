@@ -19,22 +19,15 @@ void show(node* head)
 		head = head->next;
 	}
 	cout << endl;
+	return;
 }
-void add(node *&head, node *newNode)
+void unlink(node *Node)
 {
-	if (head==NULL)
-	{
-		newNode->next = newNode->prev=NULL;
-		head = newNode;
-		return;
-	}
-	else if (newNode)
-	{
-		newNode->next = head->next;
-		if(newNode->next) newNode->next->prev = newNode;
-		newNode->prev = head;
-		head->next = newNode;
-	}
+    if (Node->prev) Node->prev->next=Node->next;
+    if (Node->next) Node->next->prev=Node->prev;
+    Node->prev=NULL;
+    Node->next=NULL;
+    return;
 }
 void add(node*& head, float value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
 {
@@ -249,8 +242,8 @@ node *split(node *&head, int pos)
 		else return NULL;
 	}
 	node *head2 = temp->next;
-	temp->prev->next = NULL;
-	temp->prev = NULL;
+	head2->prev=NULL;
+	temp->next = NULL;
 	return head2;
 }
 void bubblesort(node *&head)
@@ -281,63 +274,97 @@ void merge(node *head1, node *head2)
 	head1->next = head2;
 	head2->next = head1;
 }
-node *quicksort(node *head,node *&finalHead)
+void insertsort(node *&head)
 {
-	if (head->next == NULL)
-	{
-		if (!finalHead) finalHead = head;
-		return head;
-	}
-	if (head->next->next == NULL)
-	{
-
-		if (head->value>head->next->value) swap(head, head, head->next);
-		if (!finalHead) finalHead = head;
-		return head->next;
-	}
-	node *low = NULL, *mid = NULL, *top = NULL;
-	float pivot = get(head);
-	node *temp = head;
-	node *last = NULL;
-	while (temp)
-	{
-		node *next = temp->next;
-		if (get(temp)<pivot) add(low, temp);
-		if (get(temp) == pivot)
-		{
-			add(mid, temp);
-			if (!top && !mid->next||mid->next&&!mid->next->next) last = temp;
-		}
-		if (get(temp) > pivot)
-		{
-			add(top, temp);
-			if (!top || (top&&!top->next) ) last = temp;
-		}
-		temp = next;
-	}
-	node *lastLow=NULL;
-	if (low) lastLow=quicksort(low,finalHead);
-	if (top) quicksort(top,finalHead);
-	merge(lastLow, mid);
-	merge(mid, top);
-	return last;
+    node *newHead=NULL;
+    while (head)
+    {
+        node *temp=head;
+        head=head->next;
+        unlink(temp);
+        if (newHead==NULL)
+        {
+            newHead=temp;
+        }
+        else
+        {
+            node *temp2=newHead;
+            if (newHead->value > temp->value)
+            {
+                temp->next=newHead;
+                newHead->prev=temp;
+                newHead=temp;
+                continue;
+            }
+            else while(temp2->next
+                       &&temp->value > temp2->next->value)
+            {
+                temp2=temp2->next;
+            }
+            temp->next=temp2->next;
+            temp->prev=temp2;
+            temp2->next=temp;
+        }
+    }
+    head=newHead;
 }
-void *quicksort(node *&head)
-{
-	node *finalHead=NULL;
-	quicksort(head, finalHead);	//works, because quicksort (node *head, node *&finalHead) sets
-	head = finalHead;			//finalHead to head when head has one or two elements for the first
-	return NULL;						//time(finalHead==NULL), which are guaranteed to be the very lowest
-								//elements
-}
-int main()						
+//node *quicksort(node *head,node *&finalHead)
+//{
+//	if (head->next == NULL)
+//	{
+//		if (!finalHead) finalHead = head;
+//		return head;
+//	}
+//	if (head->next->next == NULL)
+//	{
+//
+//		if (head->value>head->next->value) swap(head, head, head->next);
+//		if (!finalHead) finalHead = head;
+//		return head->next;
+//	}
+//	node *low = NULL, *mid = NULL, *top = NULL;
+//	float pivot = get(head);
+//	node *temp = head;
+//	node *last = NULL;
+//	while (temp)
+//	{
+//		node *next = temp->next;
+//		if (get(temp)<pivot) add(low, temp);
+//		if (get(temp) == pivot)
+//		{
+//			add(mid, temp);
+//			if (!top && !mid->next||mid->next&&!mid->next->next) last = temp;
+//		}
+//		if (get(temp) > pivot)
+//		{
+//			add(top, temp);
+//			if (!top || (top&&!top->next) ) last = temp;
+//		}
+//		temp = next;
+//	}
+//	node *lastLow=NULL;
+//	if (low) lastLow=quicksort(low,finalHead);
+//	if (top) quicksort(top,finalHead);
+//	merge(lastLow, mid);
+//	merge(mid, top);
+//	return last;
+//}
+//void *quicksort(node *&head)
+//{
+//	node *finalHead=NULL;
+//	quicksort(head, finalHead);	//works, because quicksort (node *head, node *&finalHead) sets
+//	head = finalHead;			//finalHead to head when head has one or two elements for the first
+//	return;						//time(finalHead==NULL), which are guaranteed to be the very lowest
+//								//elements
+//}
+int main()
 {
 	node *head = NULL, *head2 = NULL;
 	show(head);
 	int i = 100;
 	while (1)
 	{
-		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort" << endl;
+		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort, 10:insertsort" << endl;
 		int n;
 		cin >> n;
 		cout << endl;
@@ -396,8 +423,11 @@ int main()
 			bubblesort(head);
 			break;
 		case 9:
-			quicksort(head);
+//			quicksort(head);
 			break;
+        case 10:
+            insertsort(head);
+            break;
 		}
 		show(head);
 		show(head2);
