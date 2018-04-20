@@ -12,22 +12,23 @@ struct node
 };
 void show(node* head)
 {
-
-	while (head != NULL)
+	int i = 0;
+	while (head != NULL&&i<20)
 	{
 		cout << head->value << '\t';
 		head = head->next;
+		i++;
 	}
 	cout << endl;
 	return;
 }
 void unlink(node *Node)
 {
-    if (Node->prev) Node->prev->next=Node->next;
-    if (Node->next) Node->next->prev=Node->prev;
-    Node->prev=NULL;
-    Node->next=NULL;
-    return;
+	if (Node->prev) Node->prev->next = Node->next;
+	if (Node->next) Node->next->prev = Node->prev;
+	Node->prev = NULL;
+	Node->next = NULL;
+	return;
 }
 void add(node*& head, float value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
 {
@@ -242,7 +243,7 @@ node *split(node *&head, int pos)
 		else return NULL;
 	}
 	node *head2 = temp->next;
-	head2->prev=NULL;
+	head2->prev = NULL;
 	temp->next = NULL;
 	return head2;
 }
@@ -276,37 +277,78 @@ void merge(node *head1, node *head2)
 }
 void insertsort(node *&head)
 {
-    node *newHead=NULL;
-    while (head)
-    {
-        node *temp=head;
-        head=head->next;
-        unlink(temp);
-        if (newHead==NULL)
-        {
-            newHead=temp;
-        }
-        else
-        {
-            node *temp2=newHead;
-            if (newHead->value > temp->value)
-            {
-                temp->next=newHead;
-                newHead->prev=temp;
-                newHead=temp;
-                continue;
-            }
-            else while(temp2->next
-                       &&temp->value > temp2->next->value)
-            {
-                temp2=temp2->next;
-            }
-            temp->next=temp2->next;
-            temp->prev=temp2;
-            temp2->next=temp;
-        }
-    }
-    head=newHead;
+	node *newHead = NULL;
+	while (head)
+	{
+		node *temp = head;
+		head = head->next;
+		unlink(temp);
+		if (newHead == NULL)
+		{
+			newHead = temp;
+		}
+		else
+		{
+			node *temp2 = newHead;
+			if (newHead->value > temp->value)
+			{
+				temp->next = newHead;
+				newHead->prev = temp;
+				newHead = temp;
+				continue;
+			}
+			else while (temp2->next
+				&&temp->value > temp2->next->value)
+			{
+				temp2 = temp2->next;
+			}
+			temp->next = temp2->next;
+			temp->prev = temp2;
+			temp2->next = temp;
+		}
+	}
+	head = newHead;
+}
+void selectionsort(node *&head)
+{
+	node *max=NULL;
+	node *head2=NULL;
+	while (head)
+	{
+		float maxValue = head->value;
+		node *temp = head;
+		while (temp)
+		{
+			if (temp->value >= maxValue)
+			{
+				max = temp;
+				maxValue = temp->value;
+			}
+			temp = temp->next;
+		}
+		if (max) unlink(max);
+		cout << "if (max) unlink(max);\nhead:\n";
+		show(head);
+		cout << "\nhead2:\n";
+		show(head2);
+		cout << "\n\n\n";
+
+		max->next = head2;
+		cout << "max->next = head2;\nhead:\n";
+		show(head);
+		cout << "\nhead2:\n";
+		show(head2);
+		cout << "\n\n\n";
+
+		if (head2) head2->prev = max;
+		head2 = max;
+		cout << "if (head2) head2->prev = max;\nhead2 = max; \nhead:\n";
+		show(head);
+		cout << "\nhead2:\n";
+		show(head2);
+		cout << "\n\n\n";
+	}
+	head = head2;
 }
 //node *quicksort(node *head,node *&finalHead)
 //{
@@ -364,7 +406,7 @@ int main()
 	int i = 100;
 	while (1)
 	{
-		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort, 10:insertsort" << endl;
+		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort, 10:insertsort, 11: selectionsort" << endl;
 		int n;
 		cin >> n;
 		cout << endl;
@@ -423,11 +465,14 @@ int main()
 			bubblesort(head);
 			break;
 		case 9:
-//			quicksort(head);
+			//			quicksort(head);
 			break;
-        case 10:
-            insertsort(head);
-            break;
+		case 10:
+			insertsort(head);
+			break;
+		case 11:
+			selectionsort(head);
+			break;
 		}
 		show(head);
 		show(head2);
