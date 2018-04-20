@@ -326,27 +326,12 @@ void selectionsort(node *&head)
 			}
 			temp = temp->next;
 		}
+		if (max==head) head=head->next;
 		if (max) unlink(max);
-		cout << "if (max) unlink(max);\nhead:\n";
-		show(head);
-		cout << "\nhead2:\n";
-		show(head2);
-		cout << "\n\n\n";
-
 		max->next = head2;
-		cout << "max->next = head2;\nhead:\n";
-		show(head);
-		cout << "\nhead2:\n";
-		show(head2);
-		cout << "\n\n\n";
-
 		if (head2) head2->prev = max;
 		head2 = max;
-		cout << "if (head2) head2->prev = max;\nhead2 = max; \nhead:\n";
-		show(head);
-		cout << "\nhead2:\n";
-		show(head2);
-		cout << "\n\n\n";
+		
 	}
 	head = head2;
 }
