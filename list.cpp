@@ -10,9 +10,10 @@ struct node
 	node* next = NULL;
 	node* prev = NULL;
 };
-void show(node* head)
+void show(node* head, string indent="")
 {
 	int i = 0;
+	cout<<indent;
 	while (head != NULL&&i<20)
 	{
 		cout << head->value << '\t';
@@ -22,13 +23,12 @@ void show(node* head)
 	cout << endl;
 	return;
 }
-void unlink(node *Node)
+void unlink(node *&Node)
 {
 	if (Node->prev) Node->prev->next = Node->next;
 	if (Node->next) Node->next->prev = Node->prev;
 	Node->prev = NULL;
 	Node->next = NULL;
-	return;
 }
 void add(node*& head, float value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
 {
@@ -235,15 +235,15 @@ float get(node *Node)
 }
 node *split(node *&head, int pos)
 {
-	if (pos < 1) return NULL;
+	if (pos < 0) return NULL;
 	node *temp = head;
 	for (int i = 0; i < pos; i++)
 	{
-		if (temp) temp = temp->next;
+		if (temp->next) temp = temp->next;
 		else return NULL;
 	}
 	node *head2 = temp->next;
-	head2->prev = NULL;
+	if (head2) head2->prev = NULL;
 	temp->next = NULL;
 	return head2;
 }
@@ -266,15 +266,86 @@ void bubblesort(node *&head)
 		last = lastCandidate;
 	} while (last != head);
 }
-void merge(node *head1, node *head2)
+node *mergesort(node *head1, int n, int iteration)
 {
-	if (head1) while (head1->next)
-	{
-		head1 = head1->next;
-	}
-	head1->next = head2;
-	head2->next = head1;
+    string indent;
+    for (int i=0; i<iteration; i++)
+        indent+="    ";
+    if (n==1) return head1;
+    cout<<indent<<"mergesort, iteration:"<<iteration<<", size:"<<n<<endl;
+    cout<<indent<<"head:"<<head1<<endl;
+    show (head1,indent);
+    node *head2=split(head1,n/2-1);
+    cout<<indent<<"after split:"<<endl;
+    cout<<indent<<head1<<endl;
+    show (head1,indent);
+    cout<<endl<<indent<<head2<<endl;
+    show (head2,indent);
+    cout<<endl;
+    if (head1->next) head1=mergesort(head1, n/2, iteration+1);
+    if (head2->next) head2=mergesort(head2, n/2+n%2, iteration+1);
+    node *sorted=NULL;
+    node *tail=NULL;
+    while (head1&&head2)
+    {
+        node *temp=NULL;
+        if (head1->value<head2->value)
+        {
+            temp=head1;
+            head1=head1->next;
+            if(head1)head1->prev=NULL;
+
+        }
+        else
+        {
+            temp=head2;
+            head2=head2->next;
+            if(head2)head2->prev=NULL;
+        }
+        if (sorted==NULL)
+        {
+            temp->next=temp->prev=NULL;
+            sorted=temp;
+            tail=sorted;
+        }
+        else
+        {
+            temp->prev=tail;
+            tail=tail->next=temp;
+        }
+    }
+    if (head1)
+    {
+        head1->prev=tail;
+        tail->next=head1;
+    }
+    else if (head2)
+    {
+        if (head1)
+    {
+        head2->prev=tail;
+        tail->next=head2;
+    }
+    }
+    cout<<indent<<"sorted:\n";
+    show(sorted,indent);
+    return sorted;
 }
+void mergesort(node *&head)
+{
+    if (head==NULL)
+    {
+        cout<<"mergesort: list empty\n";
+        return;
+    }
+    cout<<"mergesort initialized\n";
+    int n=1;
+    node *temp=head;
+	while ( (temp=temp->next) )  n++;
+	cout<<"initialization complete\n";
+	head=mergesort (head, n,1);
+}
+
 void insertsort(node *&head)
 {
 	node *newHead = NULL;
@@ -331,7 +402,7 @@ void selectionsort(node *&head)
 		max->next = head2;
 		if (head2) head2->prev = max;
 		head2 = max;
-		
+
 	}
 	head = head2;
 }
@@ -391,7 +462,7 @@ int main()
 	int i = 100;
 	while (1)
 	{
-		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort, 10:insertsort, 11: selectionsort" << endl;
+		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort, 10:insertsort, 11: selectionsort, 12:mergesort" << endl;
 		int n;
 		cin >> n;
 		cout << endl;
@@ -458,7 +529,11 @@ int main()
 		case 11:
 			selectionsort(head);
 			break;
+        case 12:
+            mergesort(head);
+            break;
 		}
+		cout<<"main loop; heads\n";
 		show(head);
 		show(head2);
 	}
