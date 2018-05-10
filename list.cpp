@@ -268,20 +268,8 @@ void bubblesort(node *&head)
 }
 node *mergesort(node *head1, int n, int iteration)
 {
-    string indent;
-    for (int i=0; i<iteration; i++)
-        indent+="    ";
     if (n==1) return head1;
-    cout<<indent<<"mergesort, iteration:"<<iteration<<", size:"<<n<<endl;
-    cout<<indent<<"head:"<<head1<<endl;
-    show (head1,indent);
     node *head2=split(head1,n/2-1);
-    cout<<indent<<"after split:"<<endl;
-    cout<<indent<<head1<<endl;
-    show (head1,indent);
-    cout<<endl<<indent<<head2<<endl;
-    show (head2,indent);
-    cout<<endl;
     if (head1->next) head1=mergesort(head1, n/2, iteration+1);
     if (head2->next) head2=mergesort(head2, n/2+n%2, iteration+1);
     node *sorted=NULL;
@@ -321,14 +309,9 @@ node *mergesort(node *head1, int n, int iteration)
     }
     else if (head2)
     {
-        if (head1)
-    {
         head2->prev=tail;
         tail->next=head2;
     }
-    }
-    cout<<indent<<"sorted:\n";
-    show(sorted,indent);
     return sorted;
 }
 void mergesort(node *&head)
@@ -338,11 +321,9 @@ void mergesort(node *&head)
         cout<<"mergesort: list empty\n";
         return;
     }
-    cout<<"mergesort initialized\n";
     int n=1;
     node *temp=head;
 	while ( (temp=temp->next) )  n++;
-	cout<<"initialization complete\n";
 	head=mergesort (head, n,1);
 }
 
@@ -432,7 +413,7 @@ void selectionsort(node *&head)
 //		{
 //			add(mid, temp);
 //			if (!top && !mid->next||mid->next&&!mid->next->next) last = temp;
-//		}
+//        }
 //		if (get(temp) > pivot)
 //		{
 //			add(top, temp);
@@ -463,7 +444,7 @@ int main()
 	while (1)
 	{
 		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort, 10:insertsort, 11: selectionsort, 12:mergesort" << endl;
-		int n;
+		long int n;
 		cin >> n;
 		cout << endl;
 		switch (n)
@@ -472,9 +453,15 @@ int main()
 			cout << "How many numbers:";
 			cin >> n;
 			srand(time(NULL));
-			for (int i = 0; i < n; i++)
+			long int j;
+			try
 			{
-				add(head, rand() % 900 + 100);
+                for (j = 0; j < n; j++)
+                {
+                    add(head, rand() % 900 + 100);
+                }
+			} catch (const std::bad_alloc& e) {
+                std::cout << "Allocation failed: " << e.what() << '\n'<<"j:"<<j<<"\n";
 			}
 			break;
 		case 1:     //add at pos
