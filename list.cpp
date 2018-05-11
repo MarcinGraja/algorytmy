@@ -4,8 +4,9 @@
 #include <ctime>
 #include <cstdlib>
 #include <string>
-#define debug 1
 using namespace std;
+#define debug 0
+int maxIteration;
 struct node
 {
 	float value;
@@ -14,13 +15,11 @@ struct node
 };
 void show(node* head, string indent="")
 {
-	int i = 0;
 	cout << indent;
-	while (head != NULL&&i<20)
+	while (head != NULL)
 	{
 		cout << head->value << '\t';
 		head = head->next;
-		i++;
 	}
 	cout << endl;
 	return;
@@ -83,6 +82,10 @@ void add(node*& head, float value)
 }
 void swap(node *&head, node *t1, node *t2)
 {
+	if (!(t1&&t2))
+	{
+		return;
+	}
 	node *t1Prev = t1->prev, *t1Next = t1->next;
 	if (t1->next == t2 || t2->next == t1)
 	{
@@ -167,7 +170,7 @@ void swap(node*&head, int pos1, int pos2)
 	if (t2->prev) t2->prev->next = t2;
 	if (t2->next) t2->next->prev = t2;
 }
-void readFromFile(node*& head, char* filename)
+void readFromFile(node*& head, string filename)
 {
 	float a;
 	ifstream F;
@@ -399,20 +402,25 @@ void qsadd(node *&head, node *element)
 		head->next = element;
 	}
 }
-node *quicksort(node *head, int iteration)
+node *quicksort(node *head, int iteration, string indent)
 {
-	string indent;
-	for (int i = 0; i < iteration; i++) indent += "";
+	indent+="    ";
+	string dbgmsg=indent+to_string(iteration)+":";
+	if (iteration > maxIteration)
+	{
+		maxIteration = iteration;
+		//cout << maxIteration << endl;
+	}
 	if (debug)
 	{
-		cout << indent << "\niteration:" << iteration << ";head:\n";
+		cout << dbgmsg << " head:\n";
 		show(head, indent);
 	}
 	if (head->next == NULL)
 	{
 		if (debug)
 		{
-			cout << indent << "one element element iteration " << iteration<<endl;
+			cout << dbgmsg << "end 1 element:" << '\t';
 			show(head, indent);
 		}
 		return head;
@@ -423,7 +431,7 @@ node *quicksort(node *head, int iteration)
 		if (head->value > head->next->value) swap(head, head, head->next);
 		if (debug)
 		{
-			cout << indent << "two element iteration " << iteration<<endl;
+			cout << dbgmsg << "end 2 elements:" << '\t';
 			show(head, indent);
 		}
 		return head->next;
@@ -450,77 +458,160 @@ node *quicksort(node *head, int iteration)
 			if (!top || (top && !top->next)) last = temp;
 		}
 		temp = next;
-		/*cout << "\n*****in while*****\nlow:\n";
-		show(low, indent);
-		cout << "\nmid:\n";
-		show(mid, indent);
-		cout << "\nhigh:\n";
-		show(top, indent);*/
+//		cout << endl << indent << "*****in while*****\n" << indent << "low:\n";
+//		show(low, indent);
+//		cout << endl << indent << "mid:\n";
+//		show(mid, indent);
+//		cout << endl << indent <<"high:\n";
+//		show(top, indent);
 	}
 	if (debug)
 	{
-		cout << indent << "\nlow:\n";
+		cout << dbgmsg << "low:\n";
 		show(low, indent);
-		cout << indent << "\nmid:\n";
+		cout << dbgmsg << "mid:\n";
 		show(mid, indent);
-		cout << indent << "\nhigh:\n";
+		cout << dbgmsg << "high:\n";
 		show(top, indent);
 	}
 	node *lastLow = NULL;
 	if (low)
 	{
-		lastLow = quicksort(low, iteration + 1);
+		lastLow = quicksort(low, ++iteration, indent);
 		lastLow->next = mid;
 		mid->prev = lastLow;
 	}
 	if (top)
 	{
-		last = quicksort(top,  iteration + 1);
+		last = quicksort(top, ++iteration, indent);
+		while (top->prev) top = top->prev;
 		lastMid->next = top;
 		top->prev = lastMid;
 	}
 	if (debug)
 	{
-		cout << "\ncombined:\n";
-		show(low, indent);
-		cout << "end"<<endl;
-		return last;
+		cout << dbgmsg << " combined:\n";
+		if (low)show(low, indent);
+		else show(mid, indent);
+		cout << dbgmsg << "end" << endl;
 	}
+	return last;
 }
 void quicksort(node *&head)
 {
-	head=quicksort(head, 1);
+	head=quicksort(head, 1, "");
 	while (head->prev)	head = head->prev;
 	return;
+}
+struct
+{
+	clock_t startTime = clock();
+	void start()
+	{
+		startTime = clock();
+	}
+	clock_t tell()
+	{
+		return (clock() - startTime);
+	}
+}timer;
+void chooseSorting()
+{
+	bool sortTypes[5];
+	int n = -1;
+	while (n)
+	{
+		cout << "choose sorting\n 0.end selection 1. bubblesort, 2.insertsort, 3.selectionsort, 4.quicksort, 5. mergesort 6.all";
+		cin >> n;
+		if (n == 6)
+		{
+			for (int i = 0; i < 5; i++) sortTypes[i] = 1;
+		}
+		else sortTypes[n - 1] = 1;
+	}
+	int tests, diff, mult, start;
+	cout << "number of tests\n";
+	cout << "starting number\n";
+	cin >> start;
+	cout << "multiplier\n";
+	cin >> mult;
+	cout << "flat difference";
+	cin >> diff;
+	cin >> tests;
+	for (int test = 0; test < tests; test++)
+	{
+		for (long int j=0; j<)
+		if (sortTypes[0])
+		{
+			timer.start();
+			bubblesort();
+			cout << timer.tell() / (double)CLOCKS_PER_SEC << endl;
+			cout << maxIteration << endl;
+		}
+		if (sortTypes[0])
+		{
+			timer.start();
+			quicksort(head);
+			cout << timer.tell() / (double)CLOCKS_PER_SEC << endl;
+			cout << maxIteration << endl;
+		}
+		if (sortTypes[0])
+		{
+			timer.start();
+			insertsort(head);
+			cout << timer.tell() / (double)CLOCKS_PER_SEC << endl;
+			cout << maxIteration << endl;
+		}
+		if (sortTypes[0])
+		{
+			selectionsort(head);
+		}
+		if (sortTypes[0])
+		{
+			mergesort(head);
+		}
+	}
 }
 int main()
 {
 	node *head = NULL, *head2 = NULL;
 	show(head);
 	int i = 100;
+	long int count = 0;
+	int n=-1;
 	while (1)
 	{
+		maxIteration = 0;
 		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort, 10:insertsort, 11: selectionsort, 12:mergesort" << endl;
-		long int n;
-		cin >> n;
-		cout << endl;
+		
+		/*if (n == -1) n = 0;
+		else if (n == 0) n = 9;
+		else */
+			cin >> n;
+		cout << n << endl;
 		switch (n)
 		{
 		case 0:     //fill random
+		{
 			cout << "How many numbers:";
-			cin >> n;
+			cin >> count;
+			int range;
+			cout << "max";
+			cin >> range;
+
 			srand(time(NULL));
 			long int j;
 			try
 			{
-				for (j = 0; j < n; j++)
+				for (j = 0; j < count; j++)
 				{
-					add(head, rand() % 900 + 100);
+					add(head, rand() % range);
 				}
 			}
 			catch (const std::bad_alloc& e) {
 				std::cout << "Allocation failed: " << e.what() << '\n' << "j:" << j << "\n";
 			}
+		}
 			break;
 		case 1:     //add at pos
 			cout << "Position:";
@@ -562,25 +653,39 @@ int main()
 			cin >> pos >> value;
 			set(head, pos, value);
 			break;
-		case 8:     //bubblesort
-			bubblesort(head);
+		case 8:
+			chooseSorting();
 			break;
-		case 9:
-			quicksort(head);
-			break;
-		case 10:
-			insertsort(head);
-			break;
-		case 11:
-			selectionsort(head);
-			break;
-		case 12:
-			mergesort(head);
+		case 13:
+		{
+			head = head->next;
+			while (head)
+			{
+				delete head->prev;
+				head = head->next;
+			}
 			break;
 		}
+		case 14:
+		{
+			node *temp = head;
+			int i = 0;
+			while (temp)
+			{
+				i++;
+				temp = temp->next;
+			}
+			count = i;
+			cout << count;
+			break;
+		}
+		}
 		cout << "main loop; heads\n";
-		show(head);
-		show(head2);
+		if (count < 100)
+		{
+			show(head);
+			show(head2);
+		}
 	}
 	cout << endl;
 }
