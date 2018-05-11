@@ -3,6 +3,8 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <string>
+#define debug 1
 using namespace std;
 struct node
 {
@@ -13,7 +15,7 @@ struct node
 void show(node* head, string indent="")
 {
 	int i = 0;
-	cout<<indent;
+	cout << indent;
 	while (head != NULL&&i<20)
 	{
 		cout << head->value << '\t';
@@ -268,65 +270,64 @@ void bubblesort(node *&head)
 }
 node *mergesort(node *head1, int n, int iteration)
 {
-    if (n==1) return head1;
-    node *head2=split(head1,n/2-1);
-    if (head1->next) head1=mergesort(head1, n/2, iteration+1);
-    if (head2->next) head2=mergesort(head2, n/2+n%2, iteration+1);
-    node *sorted=NULL;
-    node *tail=NULL;
-    while (head1&&head2)
-    {
-        node *temp=NULL;
-        if (head1->value<head2->value)
-        {
-            temp=head1;
-            head1=head1->next;
-            if(head1)head1->prev=NULL;
+	if (n == 1) return head1;
+	node *head2 = split(head1, n / 2 - 1);
+	if (head1->next) head1 = mergesort(head1, n / 2, iteration + 1);
+	if (head2->next) head2 = mergesort(head2, n / 2 + n % 2, iteration + 1);
+	node *sorted = NULL;
+	node *tail = NULL;
+	while (head1&&head2)
+	{
+		node *temp = NULL;
+		if (head1->value<head2->value)
+		{
+			temp = head1;
+			head1 = head1->next;
+			if (head1)head1->prev = NULL;
 
-        }
-        else
-        {
-            temp=head2;
-            head2=head2->next;
-            if(head2)head2->prev=NULL;
-        }
-        if (sorted==NULL)
-        {
-            temp->next=temp->prev=NULL;
-            sorted=temp;
-            tail=sorted;
-        }
-        else
-        {
-            temp->prev=tail;
-            tail=tail->next=temp;
-        }
-    }
-    if (head1)
-    {
-        head1->prev=tail;
-        tail->next=head1;
-    }
-    else if (head2)
-    {
-        head2->prev=tail;
-        tail->next=head2;
-    }
-    return sorted;
+		}
+		else
+		{
+			temp = head2;
+			head2 = head2->next;
+			if (head2)head2->prev = NULL;
+		}
+		if (sorted == NULL)
+		{
+			temp->next = temp->prev = NULL;
+			sorted = temp;
+			tail = sorted;
+		}
+		else
+		{
+			temp->prev = tail;
+			tail = tail->next = temp;
+		}
+	}
+	if (head1)
+	{
+		head1->prev = tail;
+		tail->next = head1;
+	}
+	else if (head2)
+	{
+		head2->prev = tail;
+		tail->next = head2;
+	}
+	return sorted;
 }
 void mergesort(node *&head)
 {
-    if (head==NULL)
-    {
-        cout<<"mergesort: list empty\n";
-        return;
-    }
-    int n=1;
-    node *temp=head;
-	while ( (temp=temp->next) )  n++;
-	head=mergesort (head, n,1);
+	if (head == NULL)
+	{
+		cout << "mergesort: list empty\n";
+		return;
+	}
+	int n = 1;
+	node *temp = head;
+	while ((temp = temp->next))  n++;
+	head = mergesort(head, n, 1);
 }
-
 void insertsort(node *&head)
 {
 	node *newHead = NULL;
@@ -363,8 +364,8 @@ void insertsort(node *&head)
 }
 void selectionsort(node *&head)
 {
-	node *max=NULL;
-	node *head2=NULL;
+	node *max = NULL;
+	node *head2 = NULL;
 	while (head)
 	{
 		float maxValue = head->value;
@@ -378,7 +379,7 @@ void selectionsort(node *&head)
 			}
 			temp = temp->next;
 		}
-		if (max==head) head=head->next;
+		if (max == head) head = head->next;
 		if (max) unlink(max);
 		max->next = head2;
 		if (head2) head2->prev = max;
@@ -387,55 +388,111 @@ void selectionsort(node *&head)
 	}
 	head = head2;
 }
-//node *quicksort(node *head,node *&finalHead)
-//{
-//	if (head->next == NULL)
-//	{
-//		if (!finalHead) finalHead = head;
-//		return head;
-//	}
-//	if (head->next->next == NULL)
-//	{
-//
-//		if (head->value>head->next->value) swap(head, head, head->next);
-//		if (!finalHead) finalHead = head;
-//		return head->next;
-//	}
-//	node *low = NULL, *mid = NULL, *top = NULL;
-//	float pivot = get(head);
-//	node *temp = head;
-//	node *last = NULL;
-//	while (temp)
-//	{
-//		node *next = temp->next;
-//		if (get(temp)<pivot) add(low, temp);
-//		if (get(temp) == pivot)
-//		{
-//			add(mid, temp);
-//			if (!top && !mid->next||mid->next&&!mid->next->next) last = temp;
-//        }
-//		if (get(temp) > pivot)
-//		{
-//			add(top, temp);
-//			if (!top || (top&&!top->next) ) last = temp;
-//		}
-//		temp = next;
-//	}
-//	node *lastLow=NULL;
-//	if (low) lastLow=quicksort(low,finalHead);
-//	if (top) quicksort(top,finalHead);
-//	merge(lastLow, mid);
-//	merge(mid, top);
-//	return last;
-//}
-//void *quicksort(node *&head)
-//{
-//	node *finalHead=NULL;
-//	quicksort(head, finalHead);	//works, because quicksort (node *head, node *&finalHead) sets
-//	head = finalHead;			//finalHead to head when head has one or two elements for the first
-//	return;						//time(finalHead==NULL), which are guaranteed to be the very lowest
-//								//elements
-//}
+void qsadd(node *&head, node *element)
+{
+	if (!head) head = element;
+	else
+	{
+		element->prev = head;
+		element->next = head->next;
+		if (head->next) head->next->prev = element;
+		head->next = element;
+	}
+}
+node *quicksort(node *head, int iteration)
+{
+	string indent;
+	for (int i = 0; i < iteration; i++) indent += "";
+	if (debug)
+	{
+		cout << indent << "\niteration:" << iteration << ";head:\n";
+		show(head, indent);
+	}
+	if (head->next == NULL)
+	{
+		if (debug)
+		{
+			cout << indent << "one element element iteration " << iteration<<endl;
+			show(head, indent);
+		}
+		return head;
+	}
+	if (head->next->next == NULL)
+	{
+
+		if (head->value > head->next->value) swap(head, head, head->next);
+		if (debug)
+		{
+			cout << indent << "two element iteration " << iteration<<endl;
+			show(head, indent);
+		}
+		return head->next;
+	}
+	node *low = NULL, *mid = NULL, *top = NULL;
+	float pivot = head->value;
+	node *temp = head;
+	node *last = NULL;
+	node *lastMid = NULL;
+	while (temp)
+	{
+		node *next = temp->next;
+		unlink(temp);
+		if (temp->value < pivot) qsadd(low, temp);
+		if (temp->value == pivot)
+		{
+			qsadd(mid, temp);
+			if (!mid || mid && !mid->next) lastMid = temp;
+			if (!top && !mid->next /*|| mid->next && !mid->next->next*/) last = temp;
+		}
+		if (temp->value > pivot)
+		{
+			qsadd(top, temp);
+			if (!top || (top && !top->next)) last = temp;
+		}
+		temp = next;
+		/*cout << "\n*****in while*****\nlow:\n";
+		show(low, indent);
+		cout << "\nmid:\n";
+		show(mid, indent);
+		cout << "\nhigh:\n";
+		show(top, indent);*/
+	}
+	if (debug)
+	{
+		cout << indent << "\nlow:\n";
+		show(low, indent);
+		cout << indent << "\nmid:\n";
+		show(mid, indent);
+		cout << indent << "\nhigh:\n";
+		show(top, indent);
+	}
+	node *lastLow = NULL;
+	if (low)
+	{
+		lastLow = quicksort(low, iteration + 1);
+		lastLow->next = mid;
+		mid->prev = lastLow;
+	}
+	if (top)
+	{
+		last = quicksort(top,  iteration + 1);
+		lastMid->next = top;
+		top->prev = lastMid;
+	}
+	if (debug)
+	{
+		cout << "\ncombined:\n";
+		show(low, indent);
+		cout << "end"<<endl;
+		return last;
+	}
+}
+void quicksort(node *&head)
+{
+	head=quicksort(head, 1);
+	while (head->prev)	head = head->prev;
+	return;
+}
 int main()
 {
 	node *head = NULL, *head2 = NULL;
@@ -456,12 +513,13 @@ int main()
 			long int j;
 			try
 			{
-                for (j = 0; j < n; j++)
-                {
-                    add(head, rand() % 900 + 100);
-                }
-			} catch (const std::bad_alloc& e) {
-                std::cout << "Allocation failed: " << e.what() << '\n'<<"j:"<<j<<"\n";
+				for (j = 0; j < n; j++)
+				{
+					add(head, rand() % 900 + 100);
+				}
+			}
+			catch (const std::bad_alloc& e) {
+				std::cout << "Allocation failed: " << e.what() << '\n' << "j:" << j << "\n";
 			}
 			break;
 		case 1:     //add at pos
@@ -508,7 +566,7 @@ int main()
 			bubblesort(head);
 			break;
 		case 9:
-			//			quicksort(head);
+			quicksort(head);
 			break;
 		case 10:
 			insertsort(head);
@@ -516,11 +574,11 @@ int main()
 		case 11:
 			selectionsort(head);
 			break;
-        case 12:
-            mergesort(head);
-            break;
+		case 12:
+			mergesort(head);
+			break;
 		}
-		cout<<"main loop; heads\n";
+		cout << "main loop; heads\n";
 		show(head);
 		show(head2);
 	}
