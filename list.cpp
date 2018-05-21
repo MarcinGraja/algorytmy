@@ -31,7 +31,7 @@ void unlink(node *&Node)
 	Node->prev = NULL;
 	Node->next = NULL;
 }
-void add(node*& head, float value, int position)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
+void add(node*& head, float value, int position=0)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
 {
 	node* temp = head;
 	if (position <= 0 || head == 0)
@@ -75,10 +75,6 @@ void add(node*& head, float value, int position)//adds element at position. If p
 		i++;
 	}
 
-}
-void add(node*& head, float value)
-{
-	add(head, value, 0);
 }
 void swap(node *&head, node *t1, node *t2)
 {
@@ -170,20 +166,53 @@ void swap(node*&head, int pos1, int pos2)
 	if (t2->prev) t2->prev->next = t2;
 	if (t2->next) t2->next->prev = t2;
 }
-void readFromFile(node*& head, string filename)
+void readFromFile(node*& head, string filename, unsigned int howMany=-1)
 {
 	float a;
 	ifstream F;
 	F.open(filename);
 	if (F.good())
 	{
-		while (!F.eof())
+		unsigned int i = 0;
+		while (!F.eof() && i<howMany)
 		{
 			a = 0;
 			F >> a;
 			add(head, a, 100);
+			i++;
 		}
 	}
+}
+void writeToFile(node *head, string filename)
+{
+	float a;
+	ofstream F;
+	F.open(filename);
+	if (F.good())
+	{
+		while (head)
+		{
+			a = 0;
+			F << head->value<<"\n";
+			head = head->next;
+		}
+	}
+}
+node *copy(node *head)
+{
+	if (head == NULL) return NULL;
+	node *newHead = new node;
+	newHead->value = head->value;
+	node *temp = newHead;
+	while (head->next)
+	{
+		head = head->next;
+		temp->next = new node;
+		temp->next->prev = temp;
+		temp = temp->next;
+		temp->value = head->value;
+	}
+	return newHead;
 }
 void remove(node*& head, int a)
 {
@@ -203,6 +232,15 @@ void remove(node*& head, int a)
 			break;
 		}
 		temp = temp->next;
+	}
+}
+void removeAll(node *&head)
+{
+	while (head)
+	{
+		node *temp = head;
+		head = head->next;
+		delete temp;
 	}
 }
 int set(node *&head, int pos, float value)
@@ -505,7 +543,7 @@ void quicksort(node *&head)
 }
 struct
 {
-	clock_t startTime = clock();
+	clock_t startTime;
 	void start()
 	{
 		startTime = clock();
@@ -515,7 +553,7 @@ struct
 		return (clock() - startTime);
 	}
 }timer;
-void chooseSorting()
+void chooseSorting(node *head)
 {
 	bool sortTypes[5];
 	int n = -1;
@@ -529,46 +567,184 @@ void chooseSorting()
 		}
 		else sortTypes[n - 1] = 1;
 	}
-	int tests, diff, mult, start;
+	int tests, current=0, target, times, max;
 	cout << "number of tests\n";
-	cout << "starting number\n";
-	cin >> start;
-	cout << "multiplier\n";
-	cin >> mult;
-	cout << "flat difference";
-	cin >> diff;
 	cin >> tests;
+	cout << "\nrepeat each test times\n";
+	cin >> times;
+	cout << "\nstarting number\n";
+	cin >> target;
+	cout << "\nmax\n";
+	cin >> max;
+	double maxTime = 1;
+	double **time = new double*[5];
+	for (int i = 0; i < 5; i++)
+	{
+		time[i] = new double[times];
+		time[i] = { 0 };
+	}
 	for (int test = 0; test < tests; test++)
 	{
-		for (long int j=0; j<)
-		if (sortTypes[0])
+		for (; current < target; current++)
 		{
-			timer.start();
-			bubblesort();
-			cout << timer.tell() / (double)CLOCKS_PER_SEC << endl;
-			cout << maxIteration << endl;
+			add(head, rand() % max);
 		}
-		if (sortTypes[0])
+		target *= 10;
+		cout << endl << endl <<"size:" << current << endl << endl;
+		for (int i = 0; i < 5; i++)
+			for (int j = 0; j < times; j++)
+				time[i][j] = nan("");
+		for (int j = 0; j < times; j++)
 		{
-			timer.start();
-			quicksort(head);
-			cout << timer.tell() / (double)CLOCKS_PER_SEC << endl;
-			cout << maxIteration << endl;
+			if (sortTypes[0])
+			{
+				timer.start();
+				node *Copy = copy(head);
+				bubblesort(Copy);
+				time[0][j] = timer.tell()/ (double)CLOCKS_PER_SEC;
+				removeAll(Copy);
+				cout << "bubblesort: " << time << endl;
+				if (time[0][j] > maxTime)
+				{
+					sortTypes[0] = 0;
+					double average = 0;
+					int count = 0;
+					while (!isnan(time[0][count]))
+					{
+						average += time[0][count];
+						count++;
+					}
+					average /= count;
+					cout << "average:" << average  << endl;
+				}
+			}
+			if (sortTypes[1])
+			{
+				timer.start();
+				node *Copy = copy(head);
+				quicksort(Copy);
+				time[1][j] = timer.tell() / (double)CLOCKS_PER_SEC;
+				removeAll(Copy);
+				cout << "quicksort:" << time << endl;
+				if (time[1][j] > maxTime)
+				{
+					sortTypes[1] = 0;
+					double average = 0;
+					int count = 0;
+					while (!isnan(time[1][count]))
+					{
+						average += time[1][count];
+						count++;
+					}
+					average /= count;
+					cout << "average:" << average  << endl;
+				}
+				//cout << maxIteration << endl;
+			}
+			if (sortTypes[2])
+			{
+				timer.start();
+				node *Copy = copy(head);
+				insertsort(Copy);
+				time[2][j] = timer.tell() / (double)CLOCKS_PER_SEC;
+				removeAll(Copy);
+				cout << "insertsort:" << time << endl;
+				if (time[2][j] > maxTime)
+				{
+					sortTypes[2] = 0;
+					double average = 0;
+					int count = 0;
+					while (!isnan(time[2][count]))
+					{
+						average += time[2][count];
+						count++;
+					}
+					average /= count;
+					cout << "average:" << average << endl;
+				}
+				//cout << maxIteration << endl;
+			}
+			if (sortTypes[3])
+			{
+				timer.start();
+				node *Copy = copy(head);
+				selectionsort(Copy);
+				time[3][j] = timer.tell() / (double)CLOCKS_PER_SEC;
+				removeAll(Copy);
+				cout << "selectionsort: " << time << endl;
+				if (time[3][j] > maxTime)
+				{
+					sortTypes[3] = 0;
+					double average = 0;
+					int count = 0;
+					while (!isnan(time[3][count]))
+					{
+						average += time[3][count];
+						count++;
+					}
+					average /= count;
+					cout << "average:" << average << endl;
+				}
+			}
+			if (sortTypes[4])
+			{
+				timer.start();
+				node *Copy = copy(head);
+				mergesort(Copy);
+				time [4][j]= timer.tell() / (double)CLOCKS_PER_SEC;
+				removeAll(Copy);
+				cout << "mergesort:" <<time << endl;
+				if (time[4][j] > maxTime)
+				{
+					sortTypes[4] = 0;
+					double average = 0;
+					int count = 0;
+					while (!isnan(time[4][count]))
+					{
+						average += time[4][count];
+						count++;
+					}
+					average /= count;
+					cout << "average:" << average<< endl;
+				}
+			}
 		}
-		if (sortTypes[0])
+		for (int i = 0; i < 5; i++)
 		{
-			timer.start();
-			insertsort(head);
-			cout << timer.tell() / (double)CLOCKS_PER_SEC << endl;
-			cout << maxIteration << endl;
-		}
-		if (sortTypes[0])
-		{
-			selectionsort(head);
-		}
-		if (sortTypes[0])
-		{
-			mergesort(head);
+			for (int j = 0; j < times; j++)
+			{
+				if (j == 0)
+				{
+					switch (i)
+					{
+					case 1:
+						cout << "bubblesort:\n";
+						break;
+					case 2:
+						cout << "insertsort:\n";
+						break;
+					case 3:
+						cout << "selectionsort\n";
+						break;
+					case 4:
+						cout << "quicksort\n";
+						break;
+					case 5:
+						cout << "mergesort\n";
+						break;
+					}
+				}
+				cout << j << ":" << time[i][j] << endl;
+			}
+			int count = 0;
+			double average = 0;
+			while (!isnan(time[i][count]))
+			{
+				average += time[i][count];
+				count++;
+			}
+			average /= count;
+			cout << "average:";
 		}
 	}
 }
@@ -593,6 +769,9 @@ int main()
 		{
 		case 0:     //fill random
 		{
+			int mode;
+			cout << "Write to file?\n 1. yes 2. no\n";
+			cin >> mode;
 			cout << "How many numbers:";
 			cin >> count;
 			int range;
@@ -603,13 +782,24 @@ int main()
 			long int j;
 			try
 			{
+				timer.start();
 				for (j = 0; j < count; j++)
 				{
-					add(head, rand() % range);
+					float val = rand() % range;
+					add(head, val);
 				}
+				cout << "it took " << timer.tell() / CLOCKS_PER_SEC << "s to create list\n";
 			}
 			catch (const std::bad_alloc& e) {
 				std::cout << "Allocation failed: " << e.what() << '\n' << "j:" << j << "\n";
+			}
+			if (mode == 1)
+			{
+				string filename;
+				cout << "filename:\n";
+				cin >> filename;
+				writeToFile(head, filename);
+				cout << "done\n";
 			}
 		}
 			break;
@@ -654,7 +844,7 @@ int main()
 			set(head, pos, value);
 			break;
 		case 8:
-			chooseSorting();
+			chooseSorting(head);
 			break;
 		case 13:
 		{
@@ -678,6 +868,10 @@ int main()
 			count = i;
 			cout << count;
 			break;
+		}
+		case 15:
+		{
+			chooseSorting(head);
 		}
 		}
 		cout << "main loop; heads\n";
