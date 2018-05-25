@@ -4,6 +4,8 @@
 #include <ctime>
 #include <cstdlib>
 #include <string>
+#include <stack>
+#include <algorithm>
 using namespace std;
 #define debug 0
 int maxIteration;
@@ -13,7 +15,14 @@ struct node
 	node* next = NULL;
 	node* prev = NULL;
 };
-void show(node* head, string indent="")
+struct treeNode
+{
+	float value;
+	treeNode *parent=NULL;
+	treeNode *left=NULL;
+	treeNode *right=NULL;
+};
+void show(node* head, string indent = "")
 {
 	cout << indent;
 	while (head != NULL)
@@ -31,7 +40,7 @@ void unlink(node *&Node)
 	Node->prev = NULL;
 	Node->next = NULL;
 }
-void add(node*& head, float value, int position=0)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
+void add(node*& head, float value, int position = 0)//adds element at position. If position<=0 element goes at the start; if position>=number of elements, it goes at the end
 {
 	node* temp = head;
 	if (position <= 0 || head == 0)
@@ -166,7 +175,7 @@ void swap(node*&head, int pos1, int pos2)
 	if (t2->prev) t2->prev->next = t2;
 	if (t2->next) t2->next->prev = t2;
 }
-void readFromFile(node*& head, string filename, unsigned int howMany=-1)
+void readFromFile(node*& head, string filename, unsigned int howMany = -1)
 {
 	float a;
 	ifstream F;
@@ -193,7 +202,7 @@ void writeToFile(node *head, string filename)
 		while (head)
 		{
 			a = 0;
-			F << head->value<<"\n";
+			F << head->value << "\n";
 			head = head->next;
 		}
 	}
@@ -442,8 +451,8 @@ void qsadd(node *&head, node *element)
 }
 node *quicksort(node *head, int iteration, string indent)
 {
-	indent+="    ";
-	string dbgmsg=indent+to_string(iteration)+":";
+	indent += "    ";
+	string dbgmsg = indent + to_string(iteration) + ":";
 	if (iteration > maxIteration)
 	{
 		maxIteration = iteration;
@@ -496,12 +505,12 @@ node *quicksort(node *head, int iteration, string indent)
 			if (!top || (top && !top->next)) last = temp;
 		}
 		temp = next;
-//		cout << endl << indent << "*****in while*****\n" << indent << "low:\n";
-//		show(low, indent);
-//		cout << endl << indent << "mid:\n";
-//		show(mid, indent);
-//		cout << endl << indent <<"high:\n";
-//		show(top, indent);
+		//		cout << endl << indent << "*****in while*****\n" << indent << "low:\n";
+		//		show(low, indent);
+		//		cout << endl << indent << "mid:\n";
+		//		show(mid, indent);
+		//		cout << endl << indent <<"high:\n";
+		//		show(top, indent);
 	}
 	if (debug)
 	{
@@ -537,9 +546,87 @@ node *quicksort(node *head, int iteration, string indent)
 }
 void quicksort(node *&head)
 {
-	head=quicksort(head, 1, "");
+	head = quicksort(head, 1, "");
 	while (head->prev)	head = head->prev;
 	return;
+}
+void addTree(treeNode*& tree, int pos, float value)
+{
+	stack <bool> bStack;
+	treeNode *temp;
+	while (pos > 0)
+	{
+		bStack.push(pos % 2);
+		pos / 2;
+	}
+	while (bStack.size > 1)
+	{
+		if (bStack.top() == 0)
+		{
+			temp = temp->left;
+		}
+		else temp = temp->right;
+		if (temp == 0) cout << "\n wrong position\n";
+	}
+	if (bStack.top() == 0)
+	{
+		temp->left = new treeNode;
+		temp = temp->left;
+	}
+	else
+	{
+		temp->right = new treeNode;
+		temp = temp->right;
+	}
+	temp->value = value;
+}
+treeNode *restoreHeap(treeNode *head)
+{
+	int change = 0;
+	while (change==0)
+	if (head->value < head->left->value)
+	{
+		if (head->parent)
+		{
+			if (head->parent->left == head)
+			{
+				
+				head->parent->left = head->left;
+			}
+			else
+			{
+				head->parent->right = head->left;
+			}
+		}
+		head->left->parent = head->parent;
+		treeNode *tl = head->left, *tr = head->right;
+
+		head->parent = head->left;
+		head->left = head->left->left;
+		head->right = head->left->right;
+		
+		head->left->left = tl;
+		head->left->right = tr;
+		head = head->left;
+	}
+}
+treeNode *createHeap(node *head)
+{
+	treeNode *treeHead=NULL;
+	int n = 1;
+	while (head)
+	{
+		addTree(treeHead, n, head->value);
+		n++;
+		head = head->next;
+		delete head->prev;
+	}
+	restoreHeap(treeHead);
+}
+void heapsort(node *head)
+{
+	treeNode *tree = createHeap(head);
+
 }
 struct
 {
@@ -567,7 +654,7 @@ void chooseSorting(node *head)
 		}
 		else sortTypes[n - 1] = 1;
 	}
-	int tests, current=0, target, times, max;
+	int tests, current = 0, target, times, max;
 	cout << "number of tests\n";
 	cin >> tests;
 	cout << "\nrepeat each test times\n";
@@ -590,7 +677,7 @@ void chooseSorting(node *head)
 			add(head, rand() % max);
 		}
 		target *= 10;
-		cout << endl << endl <<"size:" << current << endl << endl;
+		cout << endl << endl << "size:" << current << endl << endl;
 		for (int i = 0; i < 5; i++)
 			for (int j = 0; j < times; j++)
 				time[i][j] = nan("");
@@ -601,7 +688,7 @@ void chooseSorting(node *head)
 				timer.start();
 				node *Copy = copy(head);
 				bubblesort(Copy);
-				time[0][j] = timer.tell()/ (double)CLOCKS_PER_SEC;
+				time[0][j] = timer.tell() / (double)CLOCKS_PER_SEC;
 				removeAll(Copy);
 				cout << "bubblesort: " << time << endl;
 				if (time[0][j] > maxTime)
@@ -615,7 +702,7 @@ void chooseSorting(node *head)
 						count++;
 					}
 					average /= count;
-					cout << "average:" << average  << endl;
+					cout << "average:" << average << endl;
 				}
 			}
 			if (sortTypes[1])
@@ -637,7 +724,7 @@ void chooseSorting(node *head)
 						count++;
 					}
 					average /= count;
-					cout << "average:" << average  << endl;
+					cout << "average:" << average << endl;
 				}
 				//cout << maxIteration << endl;
 			}
@@ -691,9 +778,9 @@ void chooseSorting(node *head)
 				timer.start();
 				node *Copy = copy(head);
 				mergesort(Copy);
-				time [4][j]= timer.tell() / (double)CLOCKS_PER_SEC;
+				time[4][j] = timer.tell() / (double)CLOCKS_PER_SEC;
 				removeAll(Copy);
-				cout << "mergesort:" <<time << endl;
+				cout << "mergesort:" << time << endl;
 				if (time[4][j] > maxTime)
 				{
 					sortTypes[4] = 0;
@@ -705,7 +792,7 @@ void chooseSorting(node *head)
 						count++;
 					}
 					average /= count;
-					cout << "average:" << average<< endl;
+					cout << "average:" << average << endl;
 				}
 			}
 		}
@@ -754,128 +841,111 @@ int main()
 	show(head);
 	int i = 100;
 	long int count = 0;
-	int n=-1;
+	int n = -1;
 	while (1)
 	{
 		maxIteration = 0;
-		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:bubblesort, 9:quicksort, 10:insertsort, 11: selectionsort, 12:mergesort" << endl;
-		
+		cout << "0: fill randomly; 1:add at given pos; 2:delete of given value; 3:read from file; 4:swap, 5:split, 6:get, 7:set, 8:choose sorting, 9:quicksort, 10:mergesort, 11:delete all" << endl;
+
 		/*if (n == -1) n = 0;
 		else if (n == 0) n = 9;
 		else */
-			cin >> n;
+		cin >> n;
 		cout << n << endl;
 		switch (n)
 		{
-		case 0:     //fill random
-		{
-			int mode;
-			cout << "Write to file?\n 1. yes 2. no\n";
-			cin >> mode;
-			cout << "How many numbers:";
-			cin >> count;
-			int range;
-			cout << "max";
-			cin >> range;
-
-			srand(time(NULL));
-			long int j;
-			try
+			case 0:     //fill random
 			{
-				timer.start();
-				for (j = 0; j < count; j++)
+				int mode;
+				cout << "Write to file?\n 1. yes 2. no\n";
+				cin >> mode;
+				cout << "How many numbers:";
+				cin >> count;
+				int range;
+				cout << "max";
+				cin >> range;
+
+				srand(time(NULL));
+				long int j;
+				try
 				{
-					float val = rand() % range;
-					add(head, val);
+					timer.start();
+					for (j = 0; j < count; j++)
+					{
+						float val = rand() % range;
+						add(head, val);
+					}
+					cout << "it took " << timer.tell() / CLOCKS_PER_SEC << "s to create list\n";
 				}
-				cout << "it took " << timer.tell() / CLOCKS_PER_SEC << "s to create list\n";
-			}
-			catch (const std::bad_alloc& e) {
-				std::cout << "Allocation failed: " << e.what() << '\n' << "j:" << j << "\n";
-			}
-			if (mode == 1)
-			{
-				string filename;
-				cout << "filename:\n";
-				cin >> filename;
-				writeToFile(head, filename);
-				cout << "done\n";
-			}
-		}
-			break;
-		case 1:     //add at pos
-			cout << "Position:";
-			cin >> n;
-			cout << endl;
-			add(head, i, n);
-			i++;
-			break;
-		case 2:     //delete value
-			cout << "Value:";
-			cin >> n;
-			cout << endl;
-			remove(head, n);
-			break;
-
-		case 3:     //read from file
-			readFromFile(head, "liczby.txt");
-			break;
-
-		case 4:     //swap
-			cout << "Positions:\n";
-			int pos1, pos2;
-			cin >> pos1 >> pos2;
-			cout << endl;
-			swap(head, pos1, pos2);
-			break;
-		case 5:     //split
-			cout << "Index of last element in first list:";
-			cin >> n;
-			head2 = split(head, n);
-			break;
-		case 6:     //get
-			int pos;
-			cin >> pos;
-			cout << get(head, pos) << endl;
-			break;
-		case 7:     //set
-			float value;
-			cin >> pos >> value;
-			set(head, pos, value);
-			break;
-		case 8:
-			chooseSorting(head);
-			break;
-		case 13:
-		{
-			head = head->next;
-			while (head)
-			{
-				delete head->prev;
-				head = head->next;
+				catch (const std::bad_alloc& e) {
+					std::cout << "Allocation failed: " << e.what() << '\n' << "j:" << j << "\n";
+				}
+				if (mode == 1)
+				{
+					string filename;
+					cout << "filename:\n";
+					cin >> filename;
+					writeToFile(head, filename);
+					cout << "done\n";
+				}
 			}
 			break;
-		}
-		case 14:
-		{
-			node *temp = head;
-			int i = 0;
-			while (temp)
-			{
+			case 1:     //add at pos
+				cout << "Position:";
+				cin >> n;
+				cout << endl;
+				add(head, i, n);
 				i++;
-				temp = temp->next;
+				break;
+			case 2:     //delete value
+				cout << "Value:";
+				cin >> n;
+				cout << endl;
+				remove(head, n);
+				break;
+
+			case 3:     //read from file
+				readFromFile(head, "liczby.txt");
+				break;
+
+			case 4:     //swap
+				cout << "Positions:\n";
+				int pos1, pos2;
+				cin >> pos1 >> pos2;
+				cout << endl;
+				swap(head, pos1, pos2);
+				break;
+			case 5:     //split
+				cout << "Index of last element in first list:";
+				cin >> n;
+				head2 = split(head, n);
+				break;
+			case 6:     //get
+				int pos;
+				cin >> pos;
+				cout << get(head, pos) << endl;
+				break;
+			case 7:     //set
+				float value;
+				cin >> pos >> value;
+				set(head, pos, value);
+				break;
+			case 8:
+				chooseSorting(head);
+				break;
+			case 9:
+				quicksort(head);
+				break;
+			case 10:
+				mergesort(head);
+				break;
+			case 11:
+			{
+				removeAll(head);
 			}
-			count = i;
-			cout << count;
-			break;
-		}
-		case 15:
-		{
-			chooseSorting(head);
-		}
 		}
 		cout << "main loop; heads\n";
-		if (count < 100)
+		if (1)
 		{
 			show(head);
 			show(head2);
