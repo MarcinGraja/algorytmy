@@ -1,3 +1,14 @@
+void qsadd(node *&head, node *element)
+{
+	if (!head) head = element;
+	else
+	{
+		element->prev = head;
+		element->next = head->next;
+		if (head->next) head->next->prev = element;
+		head->next = element;
+	}
+}
 node *quicksort(node *head)
 {
 	if (head->next == NULL)
