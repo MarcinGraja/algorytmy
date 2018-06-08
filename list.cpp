@@ -321,52 +321,53 @@ void bubblesort(node *&head)
 node *mergesort(node *head1, int n, int iteration)
 {
 	if (n == 1) return head1;
-	node *head2 = split(head1, n / 2 - 1);
-	if (head1->next) head1 = mergesort(head1, n / 2, iteration + 1);
-	if (head2->next) head2 = mergesort(head2, n / 2 + n % 2, iteration + 1);
-	node *sorted = NULL;
-	node *tail = NULL;
+	node *head2 = split(head1, n / 2 - 1);//dzielenie listy na 2 połowy
+	if (head1->next) head1 = mergesort(head1, n / 2, iteration + 1);//mergesort pierwszej połowy
+	if (head2->next) head2 = mergesort(head2, n / 2 + n % 2, iteration + 1);//mergesort drugiej połowy
+	node *sorted = NULL;//lista zawierająca posortowane elementy
+	node *tail = NULL;//wskaźnik na koniec listy posortowanej
 	while (head1&&head2)
 	{
 		node *temp = NULL;
-		if (head1->value<head2->value)
+		if (head1->value<head2->value)//lista pierwsza zawiera element element mniejszy; ustawiamy tempa na ten element i przesuwamy wskaźnik head1 na następny element
 		{
 			temp = head1;
 			head1 = head1->next;
 			if (head1)head1->prev = NULL;
 
 		}
-		else
+		else				//lista druga zawiera element mniejszy
 		{
 			temp = head2;
 			head2 = head2->next;
 			if (head2)head2->prev = NULL;
 		}
-		if (sorted == NULL)
+		if (sorted == NULL)	//jeżeli lista posortowana jest pusta, ustawiamy wskaźnik na nią
 		{
 			temp->next = temp->prev = NULL;
 			sorted = temp;
 			tail = sorted;
 		}
-		else
+		else		//lista nie jest pusta
 		{
 			temp->prev = tail;
 			tail = tail->next = temp;
 		}
 	}
-	if (head1)
+	//jedna z list się skończyła
+	if (head1)	//pozostało head1; łączymy element ostatni z sorted z pierwszym z head1
 	{
 		head1->prev = tail;
 		tail->next = head1;
 	}
-	else if (head2)
+	else if (head2)	//analogicznie
 	{
 		head2->prev = tail;
 		tail->next = head2;
 	}
-	return sorted;
+	return sorted;//zwracamy wskaźnik na posortowaną listę
 }
-void mergesort(node *&head)
+void mergesort(node *&head)//funkcja wywołująca właściwy mergesort
 {
 	if (head == NULL)
 	{
@@ -375,7 +376,7 @@ void mergesort(node *&head)
 	}
 	int n = 1;
 	node *temp = head;
-	while ((temp = temp->next))  n++;
+	while ((temp = temp->next))  n++; //zliczamy ilość elementów listy
 	head = mergesort(head, n, 1);
 }
 void insertsort(node *&head)
